@@ -34,7 +34,6 @@ class WaveletImage(object):
 			
 		im = Image.open(path)
 		self.size = im.size
-		
 		im.thumbnail(config.img_size)
 		im = im.convert("RGB")
 		

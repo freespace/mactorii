@@ -123,12 +123,11 @@ def load_files(files):
 		print "processing file: %s"%(file)
 		wi = wavelet.open(file)
 		sig = wi.signature()
-		wi.im.thumbnail((config.crop_size, config.crop_size))
-		wi.im.save(config.tmp_file)
-	
-		thumbnail = pyglet_image.load(config.tmp_file)
+		wi.im.thumbnail((config.crop_size, config.crop_size), Image.ANTIALIAS)
+		wi.im = wi.im.transpose(Image.FLIP_TOP_BOTTOM)
+		psurf=pyglet_image.ImageData(wi.im.size[0],wi.im.size[1],"RGB",wi.im.tostring())
 
-		images[file] = (thumbnail, None, sig, wi.size)
+		images[file] = (psurf, None, sig, wi.size)
 		
 	return images
 	
@@ -178,7 +177,7 @@ def main():
 	
 	files = sys.argv[1:]
 	images = load_files(files)
-	
+
 	win = window_setup()
 	ft = font_setup()
 	
