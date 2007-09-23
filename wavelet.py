@@ -10,7 +10,9 @@ Copyright (c) 2007 . All rights reserved.
 import sys
 import os
 import Image
+
 import config
+import pyx
 
 def open(path):
 	"""opens a file as a WaveletImage"""
@@ -31,12 +33,13 @@ class WaveletImage(object):
 			)
 			
 		im = Image.open(path)
-		im = im.resize(config.img_size)
-		im = im.convert("RGB")
-		im = im.convert("RGB", rgb2yiq)
+		self.size = im.size
 		
-		self.data = im.getdata()
-		self.im = Image.open(path)
+		im.thumbnail(config.img_size)
+		im = im.convert("RGB")
+		
+		self.data = im.convert("RGB", rgb2yiq).getdata()
+		self.im = im
 		self.wavelets = None
 		self.sig = None
 	
@@ -132,7 +135,8 @@ class WaveletImage(object):
 		assert self.data != None, "Did you call .cleanup() before .signature()?"
 		input = list(self.data)
 		
-		self.wavelets = self.transform_array(input)
+		#self.wavelets = self.transform_array(input)
+		self.wavelets = pyx.pyx_transform_array(input)
 		return
 		
 		rows, cols = self.im.size
