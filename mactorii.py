@@ -11,6 +11,7 @@ import sys
 import os
 import math
 import Image
+import shutil
 
 import wavelet
 import config
@@ -25,6 +26,8 @@ from pyglet import font
 
 files = None
 win = None
+images = dict()
+renderables = None
 
 yoffset = 0
 xoffset = 0
@@ -38,6 +41,9 @@ hoverx = 0
 hovery = 0
 
 selected = None
+hovering_over = None
+
+last_deleted = []
 
 def on_mouse_motion(x,y,dx,dy):
 	global hoverx
@@ -76,15 +82,33 @@ def on_key_release(symbol, modifier):
 def on_key_press(symbol, modifier):
 	global xoffset
 	global xmotion
-
-	if symbol == key.LEFT:
-			xmotion = 10
+	global images
+	global renderables
+	global hovering_over
+	global last_deleted
 	
+	if symbol == key.LEFT:
+		xmotion = 10
+		if modifier == key.MOD_SHIFT:
+			xmotion*=2
+				
 	if symbol == key.RIGHT:
-			xmotion -= 10
+		xmotion -= 10
+		if modifier == key.MOD_SHIFT:
+			xmotion*=2	
 
-	if modifier == key.MOD_SHIFT:
-		xmotion*=2
+	if symbol == key.D and hovering_over != None:
+		assert images.has_key(hovering_over)
+		del images[hovering_over]
+		update_renderables()
+		shutil.move(hovering_over, "%s/%s"%(config.trash_dir, os.path.basename(hovering_over)))
+		last_deleted.append(hovering_over)
+		
+	if symbol == key.U and len(last_deleted) > 0:
+		last = last_deleted.pop()
+		shutil.move("%s/%s"%(config.trash_dir, os.path.basename(last)), last)
+		load_file(last)
+		update_renderables()
 		
 def strip_width():
 	"""returns the width of the strip in pixels"""
@@ -107,6 +131,18 @@ def on_resize(width, height):
 	# compute the new xoffset
 	xoffset = p * strip_width()
 	
+def update_renderables():
+	global images
+	global renderables
+	global selected
+	
+	renderables = images.items()
+	
+	if selected != None:
+		renderables.sort(key=sort_func)
+		
+	return renderables
+	
 def sort_func(item):
 	assert selected != None
 	
@@ -118,21 +154,19 @@ def sort_func(item):
 		score.append(config.weights[b]*len(selected_sig[b].intersection(item_sig[b])))
 	return -sum(score)
 
-def load_files(files):
+def load_file(file):
 	"""loads the files given in the command line"""
-	images = dict()
 	
-	for file in files:
-		print "processing file: %s"%(file)
-		wi = wavelet.open(file)
-		sig = wi.signature()
-		wi.im.thumbnail((config.crop_size, config.crop_size), Image.ANTIALIAS)
-		wi.im = wi.im.transpose(Image.FLIP_TOP_BOTTOM)
-		psurf=pyglet_image.ImageData(wi.im.size[0],wi.im.size[1],"RGB",wi.im.tostring())
+	global images
+	
+	print "processing file: %s"%(file)
+	wi = wavelet.open(file)
+	sig = wi.signature()
+	wi.im.thumbnail((config.crop_size, config.crop_size), Image.ANTIALIAS)
+	wi.im = wi.im.transpose(Image.FLIP_TOP_BOTTOM)
+	psurf=pyglet_image.ImageData(wi.im.size[0],wi.im.size[1],"RGB",wi.im.tostring())
 
-		images[	unicode(file,'utf-8').encode('ascii', 'ignore')	] = (psurf, None, sig, wi.size)
-		
-	return images
+	images[	unicode(file,'utf-8').encode('ascii', 'ignore')	] = (psurf, None, sig, wi.size)
 	
 def window_setup():
 	"""sets up our window"""
@@ -165,6 +199,12 @@ def is_over_image(x, y, mousex, mousey):
 				
 	return True
 	
+def trash_setup():
+	try:
+		os.mkdir(config.trash_dir)
+	except:
+		return
+	
 def main():
 	global xoffset
 	global xmotion
@@ -177,9 +217,14 @@ def main():
 	global hoverx
 	global hovery
 	global selected
+	global hovering_over
+	global images
+	global renderables
 	
 	files = sys.argv[1:]
-	images = load_files(files)
+	for file in files:
+		load_file(file)
+		
 
 	win = window_setup()
 	ft = font_setup()
@@ -187,11 +232,13 @@ def main():
 	assert win != None
 	assert ft != None
 	
+	trash_setup()
+	
 	image_pattern = pyglet_image.SolidColorImagePattern((0,0,0,1))
 	
 	clock.set_fps_limit(30)
 	
-	renderables = images.items()
+	renderables = update_renderables()
 	
 	while not win.has_exit:
 		clock.tick()
@@ -212,6 +259,7 @@ def main():
 		pix_size = None
 		
 		drawn = 0
+		hovering_over = None
 		for filename, image in renderables:
 			img = image[0]
 			img.blit(x,y)
@@ -219,7 +267,7 @@ def main():
 			if is_over_image(x,y,clickx, clicky):
 				print "%s selected"%(filename)
 				selected = image
-				renderables.sort(key=sort_func)
+				renderables = update_renderables()
 				
 				clickx = -1
 				clicky = -1
@@ -233,6 +281,8 @@ def main():
 				pix_size.color = (1,1,1,1)
 				text_bg = image_pattern.create_image(config.crop_size, int(pix_size.height)	)
 				text_bg.blit(x,y)
+				hovering_over = filename
+
 				
 			drawn+=1
 			y-=config.crop_size
