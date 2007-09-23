@@ -45,6 +45,8 @@ hovering_over = None
 
 last_deleted = []
 
+fps_display = None
+
 def on_mouse_motion(x,y,dx,dy):
 	global hoverx
 	global hovery
@@ -86,6 +88,7 @@ def on_key_press(symbol, modifier):
 	global renderables
 	global hovering_over
 	global last_deleted
+	global fps_display
 	
 	if symbol == key.LEFT:
 		xmotion = 10
@@ -110,6 +113,12 @@ def on_key_press(symbol, modifier):
 		load_file(last)
 		update_renderables()
 		
+	if symbol == key.F:
+		if fps_display:
+			fps_display = None
+		else:
+			fps_display = clock.ClockDisplay()
+			
 def strip_width():
 	"""returns the width of the strip in pixels"""
 	global rows
@@ -220,6 +229,7 @@ def main():
 	global hovering_over
 	global images
 	global renderables
+	global fps_display
 	
 	files = sys.argv[1:]
 	for file in files:
@@ -294,6 +304,8 @@ def main():
 			pix_name.draw()		
 		if pix_size:
 			pix_size.draw()
+		if fps_display:
+			fps_display.draw()
 				
 		win.flip()
 	

@@ -29,4 +29,4 @@ You can press the following keys at anytime:
 left/right			scrolls left/right
 		+shift		scrolls 2x as fast
 
-
+f					displays fps
