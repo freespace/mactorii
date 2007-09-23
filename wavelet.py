@@ -22,7 +22,7 @@ class WaveletImage(object):
 		super(WaveletImage, self).__init__()
 		
 		"""
-		load the image from given path, using PIL, converts it into YIQ colour space
+		Load the image from given path, using PIL, converts it into YIQ colour space
 		"""
 		rgb2yiq = (
 			0.299,	 0.587,	 0.114,	0,
@@ -32,7 +32,7 @@ class WaveletImage(object):
 			
 		im = Image.open(path)
 		im = im.resize(config.img_size)
-		im=im.convert("RGB", rgb2yiq)
+		im = im.convert("RGB", rgb2yiq)
 		
 		self.data = im.getdata()
 		self.im = Image.open(path)
@@ -40,20 +40,23 @@ class WaveletImage(object):
 		self.sig = None
 	
 	def cleanup(self):
-		"""frees wavelets data and reverts image to rgb"""
+		"""
+		Frees wavelets data and reverts image to rgb. This method should only be called
+		*after* calling .signature() at least once
+		"""
 		self.wavelets = None
 		self.data = None
 		
 	def pix_sum(self, x,y):
-		"""returns a tuple which is the sum of the tuples given"""
+		"""Returns a tuple which is the sum of the tuples given"""
 		return ((x[0])+y[0], x[1]+y[1], x[2]+y[2])
 	
 	def pix_diff(self, x,y):
-		"""returns a tuple which is the difference of the tuples given"""
+		"""Returns a tuple which is the difference of the tuples given"""
 		return ((x[0])-y[0], x[1]-y[1], x[2]-y[2])
 	
 	def signature(self):
-		"""returns a signature tuple based on the input which is expected to be the
+		"""Returns a signature tuple based on the input which is expected to be the
 		wavelet transform of an image
 		"""
 		
@@ -100,7 +103,7 @@ class WaveletImage(object):
 		return self.sig
 	
 	def transform_array(self, input):
-		"""docstring for transform a single array"""
+		"""Performs wavelet transform on the input, destorys input"""
 		length = len(input)
 		output = [0]*length
 	
@@ -123,9 +126,9 @@ class WaveletImage(object):
 		
 	def transform(self):
 		"""
-		performs a wavelet transform on the given image
+		Performs a wavelet transform on the given image
 		"""
-		assert(self.data != None)
+		assert self.data != None, "Did you call .cleanup() before .signature()?"
 		input = list(self.data)
 		
 		self.wavelets = self.transform_array(input)
@@ -160,7 +163,7 @@ class WaveletImage(object):
 		self.wavelets = transposed
 				
 	def compare(self, other):
-		"""compars this wavelet transform to another, returning a tuple of similarness"""
+		"""Compars this wavelet transform to another, returning a tuple of similarness"""
 		sig = other.signature()
 		
 		score = []
