@@ -12,10 +12,10 @@ import os
 import Image
 import config
 
-class WaveletTransform(object):
+class WaveletImage(object):
 	"""A lazy wavelet transform class"""
 	def __init__(self, path):
-		super(WaveletTransform, self).__init__()
+		super(WaveletImage, self).__init__()
 		
 		"""
 		load the image from given path, using PIL, converts it into YIQ colour space
@@ -31,7 +31,22 @@ class WaveletTransform(object):
 		self.im=im.convert("RGB", rgb2yiq)
 		self.wavelets = None
 		self.sig = None
+		self.mode = "YIQ"
+	
+	def cleanup(self):
+		"""frees wavelets data and reverts image to rgb"""
+		self.wavelets = None
 		
+		if self.mode == "YIQ":
+			yiq2rgb = (
+				1,   0.956,	 0.621, 0,
+				1,	-0.272,	-0.647,	0,
+				1,	-1.105,	 1.702, 0
+				)
+		
+			self.im = self.im.convert("RGB", yiq2rgb)
+			self.mode="RGB"
+			
 	def pix_sum(self, x,y):
 		"""returns a tuple which is the sum of the tuples given"""
 		return ((x[0])+y[0], x[1]+y[1], x[2]+y[2])
