@@ -12,6 +12,10 @@ import os
 import Image
 import config
 
+def open(path):
+	"""opens a file as a WaveletImage"""
+	return WaveletImage(path)
+	
 class WaveletImage(object):
 	"""A lazy wavelet transform class"""
 	def __init__(self, path):
@@ -22,31 +26,24 @@ class WaveletImage(object):
 		"""
 		rgb2yiq = (
 			0.299,	 0.587,	 0.114,	0,
-			0.596,	-0.275,	-0.321,	0,
-			0.212,	-0.523,	 0.311, 0
+			0.595716,	-0.274453,	-0.321263,	0,
+			0.211456,	-0.522591,	 0.311135, 	0
 			)
+			
 		im = Image.open(path)
 		im = im.resize(config.img_size)
-		im = im.convert("RGB")
-		self.im=im.convert("RGB", rgb2yiq)
+		im=im.convert("RGB", rgb2yiq)
+		
+		self.data = im.getdata()
+		self.im = Image.open(path)
 		self.wavelets = None
 		self.sig = None
-		self.mode = "YIQ"
 	
 	def cleanup(self):
 		"""frees wavelets data and reverts image to rgb"""
 		self.wavelets = None
+		self.data = None
 		
-		if self.mode == "YIQ":
-			yiq2rgb = (
-				1,   0.956,	 0.621, 0,
-				1,	-0.272,	-0.647,	0,
-				1,	-1.105,	 1.702, 0
-				)
-		
-			self.im = self.im.convert("RGB", yiq2rgb)
-			self.mode="RGB"
-			
 	def pix_sum(self, x,y):
 		"""returns a tuple which is the sum of the tuples given"""
 		return ((x[0])+y[0], x[1]+y[1], x[2]+y[2])
@@ -128,7 +125,8 @@ class WaveletImage(object):
 		"""
 		performs a wavelet transform on the given image
 		"""
-		input = list(self.im.getdata())
+		assert(self.data != None)
+		input = list(self.data)
 		
 		self.wavelets = self.transform_array(input)
 		return
