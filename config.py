@@ -11,7 +11,7 @@ import sys
 import os
 
 taps = 96
-weights = (1, 0.75, 0.5)
+weights = (1, 0.5, 0.25)
 img_size = (256, 256)
 crop_size= 100
 tmp_file=".89885e5234e2f0ae1e2015642425d1eb.jpg"

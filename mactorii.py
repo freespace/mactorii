@@ -83,6 +83,9 @@ def on_key_press(symbol, modifier):
 	if symbol == key.RIGHT:
 			xmotion -= 10
 
+	if modifier == key.MOD_SHIFT:
+		xmotion*=2
+		
 def strip_width():
 	"""returns the width of the strip in pixels"""
 	global rows
@@ -148,7 +151,7 @@ def window_setup():
 	
 def font_setup():
 	"""sets up fonts"""
-	return font.load(config.font_name, config.font_size)
+	return font.load(config.font_name, config.font_size, bold=True)
 
 def is_over_image(x, y, mousex, mousey):
 	if mousex < 0 or mousey < 0:
@@ -183,6 +186,8 @@ def main():
 	
 	assert win != None
 	assert ft != None
+	
+	image_pattern = pyglet_image.SolidColorImagePattern((0,0,0,1))
 	
 	clock.set_fps_limit(30)
 	
@@ -223,8 +228,12 @@ def main():
 				break
 				
 			if is_over_image(x,y,hoverx, hovery):
-				pix_name = 	font.Text(ft, filename, hoverx, hovery+config.font_size+5)
-				pix_size = font.Text(ft, "%dx%d"%(image[3][0], image[3][0]), hoverx, hovery+5)
+				#pix_name = 	font.Text(ft, filename, hoverx, hovery+config.font_size+5)
+				pix_size = font.Text(ft, "%dx%d"%(image[3][0], image[3][0]), x+config.crop_size/2, y, halign=font.Text.CENTER)
+				pix_size.color = (1,1,1,1)
+				text_bg = image_pattern.create_image(config.crop_size, int(pix_size.height)	)
+				text_bg.blit(x,y)
+				
 			drawn+=1
 			y-=config.crop_size
 			
