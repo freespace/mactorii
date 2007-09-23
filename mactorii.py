@@ -127,7 +127,7 @@ def load_files(files):
 		wi.im = wi.im.transpose(Image.FLIP_TOP_BOTTOM)
 		psurf=pyglet_image.ImageData(wi.im.size[0],wi.im.size[1],"RGB",wi.im.tostring())
 
-		images[file] = (psurf, None, sig, wi.size)
+		images[	unicode(file,'utf-8').encode('ascii', 'ignore')	] = (psurf, None, sig, wi.size)
 		
 	return images
 	
