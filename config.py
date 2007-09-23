@@ -13,6 +13,7 @@ import os
 taps = 16
 weights = (1,0.5, 0.75)
 img_size = (256, 256)
+crop_size= 100
 
 def main():
 	pass

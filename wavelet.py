@@ -32,6 +32,7 @@ class WaveletImage(object):
 			
 		im = Image.open(path)
 		im = im.resize(config.img_size)
+		im = im.convert("RGB")
 		im = im.convert("RGB", rgb2yiq)
 		
 		self.data = im.getdata()
