@@ -30,7 +30,7 @@ files = None
 win = None
 images = dict()
 baselines = []
-
+unloaded = None
 renderables = None
 
 yoffset = 0
@@ -54,6 +54,8 @@ last_deleted = []
 fps_display = None
 
 display_picture = None
+
+root = None
 
 def on_mouse_motion(x,y,dx,dy):
 	global hoverx
@@ -102,6 +104,9 @@ def on_key_press(symbol, modifier):
 	global fps_display
 	global display_picture
 	global win
+	global files
+	global unloaded
+	global root
 	
 	if symbol == key.LEFT:
 		xmotion = 10
@@ -157,7 +162,25 @@ def on_key_press(symbol, modifier):
 			im = im.transpose(Image.FLIP_TOP_BOTTOM)
 			
 			display_picture = pyglet_image.ImageData(im.size[0],im.size[1],"RGB",im.tostring())
+	
+	if symbol == key.O:
+		dirname = tkFileDialog.askdirectory(parent=root,initialdir="~",title='Please select a directory')
+
+		if len(dirname ) > 0:
+			import dircache
+			ls = dircache.listdir(dirname)
+			ls = list(ls)
+			dircache.annotate(dirname, ls)
+
+			files = ["%s%s%s"%(dirname,os.path.sep,e) for e in ls if not e.endswith('/')]
+			unloaded = list(files)
 			
+			images = dict()
+				
+	if symbol == key.R:
+		unloaded = list(files)
+		images = dict()
+		
 def strip_width():
 	"""returns the width of the strip in pixels"""
 	global rows
@@ -336,6 +359,8 @@ def main():
 	global renderables
 	global fps_display
 	global display_picture
+	global unloaded
+	global root
 		
 	# order is important here. window_setup must be setup first! Likewise with font
 	win = window_setup()
@@ -343,6 +368,7 @@ def main():
 	
 	root = Tkinter.Tk()
 	root.withdraw()
+	
 	if (sys.platform != "win32") and hasattr(sys, 'frozen'):
 		root.tk.call('console', 'hide')
 				
