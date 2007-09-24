@@ -20,13 +20,20 @@ image you can press the following keys:
 
 d					deletes the image you are hovering over. By "delete" 
 					it moves the image into .mactorii-trash, so nothing 
-					is /actually/ deleted.
+					is /actually/ deleted. In full-view mode this also
+					deletes the picture, and drops you back into 
+					thumbnail mode.
+					
 u					undeletes the last image. There is no hard limit on 
-					the undo queue
+					the undo queue.
 
 You can press the following keys at anytime:
 
-left/right			scrolls left/right
-		+shift		scrolls 2x as fast
+left/right			in thumbnail view, scrolls left/right.
+		+shift		in thumbnail view, scrolls 2x as fast.
 
-f					displays fps
+f					displays fps.
+c					attempts to cluster similar images.
+v					displays the picture you are hovering over in full
+					window view. Pressing this key while in full-view
+					will drop you back into thumbnail view.

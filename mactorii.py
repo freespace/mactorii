@@ -12,6 +12,8 @@ import os
 import math
 import Image
 import shutil
+import Tkinter
+import tkFileDialog
 
 import wavelet
 import config
@@ -332,15 +334,17 @@ def main():
 	global display_picture
 	
 	win = window_setup()
-			
+	
+	root = Tkinter.Tk()
+	root.withdraw()
+	if (sys.platform != "win32") and hasattr(sys, 'frozen'):
+		root.tk.call('console', 'hide')
+				
 	if len(sys.argv) < 2:
-		import Tkinter
-		import tkFileDialog
-
-		root = Tkinter.Tk()
-		root.withdraw()
+		
 		dirname = tkFileDialog.askdirectory(parent=root,initialdir="~",title='Please select a directory')
 		
+			
 		if len(dirname ) > 0:
 			import dircache
 			ls = dircache.listdir(dirname)
@@ -348,9 +352,8 @@ def main():
 			dircache.annotate(dirname, ls)
 			
 			files = ["%s%s%s"%(dirname,os.path.sep,e) for e in ls if not e.endswith('/')]
-			
 		else:
-			exit(1)
+			sys.exit(1)
 	else:		
 		files = sys.argv[1:]
 		

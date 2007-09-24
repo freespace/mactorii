@@ -8,7 +8,7 @@ Usage:
 from setuptools import setup
 
 APP = ['mactorii.py']
-DATA_FILES = []
+DATA_FILES = ['baseline']
 OPTIONS = {'argv_emulation': True}
 
 setup(
