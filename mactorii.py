@@ -143,11 +143,11 @@ def on_key_press(symbol, modifier):
 		if display_picture != None:
 			display_picture = None
 		elif hovering_over != None:
-			print "V"
 			im = Image.open(hovering_over)
 			im.thumbnail((win.width, win.height),Image.ANTIALIAS)
 			im = im.convert("RGB")
 			im = im.transpose(Image.FLIP_TOP_BOTTOM)
+			
 			display_picture = pyglet_image.ImageData(im.size[0],im.size[1],"RGB",im.tostring())
 			
 def strip_width():
@@ -380,7 +380,9 @@ def main():
 		glClear(GL_COLOR_BUFFER_BIT)
 		
 		if display_picture != None:
-			display_picture.blit(0,0)
+			w = display_picture.width
+			h = display_picture.height
+			display_picture.blit((win.width-w)/2,(win.height-h)/2)
 			win.flip()
 			continue
 			
