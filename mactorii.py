@@ -330,10 +330,6 @@ def main():
 	global renderables
 	global fps_display
 	global display_picture
-	
-	# first thing, load baselines
-	for baseline in config.baselines:
-		load_baseline(baseline)
 		
 	# order is important here. window_setup must be setup first! Likewise with font
 	win = window_setup()
@@ -372,23 +368,35 @@ def main():
 	
 	win.set_visible()
 	unloaded = list(files)
+	unloaded_baselines = list(config.baselines)
 	
 	while not win.has_exit:
 		clock.tick()
 		win.dispatch_events()
 		glClear(GL_COLOR_BUFFER_BIT)
 		
+		if len(unloaded_baselines) > 0:
+			f = unloaded_baselines.pop()
+			str = "|||||"*len(unloaded_baselines)
+			t = font.Text(ft, str, 0, config.text_yoffset)
+			t.draw()
+			win.flip()
+			
+			load_baseline(f)
+			continue
+			
 		if len(unloaded) > 0:
 			f = unloaded.pop()
 			str = "Loading: %s"%(f)
 			t = font.Text(ft, str, 0, config.text_yoffset)
 			t.draw()			
-			win.flip()
+			#win.flip()
+			
 			load_file(f)
 			
-			if len(unloaded) == 0:
-				update_renderables()
-			continue
+			#if len(unloaded) == 0:
+			update_renderables()
+			#continue
 			
 		if display_picture != None:
 			w = display_picture.width
