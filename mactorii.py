@@ -420,7 +420,7 @@ def main():
 							
 			if is_over_image(x,y,hoverx, hovery):
 				# draw some information
-				pix_size = font.Text(ft,"%dx%d"%(image[3][0], image[3][0]), x, y+config.text_yoffset)
+				pix_size = font.Text(ft,"%dx%d"%(image[3][0], image[3][1]), x, y+config.text_yoffset)
 				pix_name = font.Text(ft, os.path.basename(filename), x, y+config.text_yoffset+int(pix_size.height))						
 
 				w = pix_size.width
