@@ -100,12 +100,13 @@ def on_key_press(symbol, modifier):
 		if modifier == key.MOD_SHIFT:
 			xmotion*=2	
 
-	if symbol == key.D and hovering_over != None:
-		assert images.has_key(hovering_over)
-		del images[hovering_over]
-		update_renderables()
-		shutil.move(hovering_over, "%s/%s"%(config.trash_dir, os.path.basename(hovering_over)))
-		last_deleted.append(hovering_over)
+	if hovering_over != None:
+		if symbol == key.D:
+			assert images.has_key(hovering_over)
+			del images[hovering_over]
+			update_renderables()
+			shutil.move(hovering_over, "%s/%s"%(config.trash_dir, os.path.basename(hovering_over)))
+			last_deleted.append(hovering_over)
 		
 	if symbol == key.U and len(last_deleted) > 0:
 		last = last_deleted.pop()
@@ -117,8 +118,7 @@ def on_key_press(symbol, modifier):
 		if fps_display:
 			fps_display = None
 		else:
-			fps_display = clock.ClockDisplay()
-			
+			fps_display = clock.ClockDisplay()		
 def strip_width():
 	"""returns the width of the strip in pixels"""
 	global rows
@@ -171,10 +171,34 @@ def load_file(file):
 	print "processing file: %s"%(file)
 	wi = wavelet.open(file)
 	sig = wi.signature()
-	wi.im.thumbnail((config.crop_size, config.crop_size), Image.ANTIALIAS)
-	wi.im = wi.im.transpose(Image.FLIP_TOP_BOTTOM)
-	psurf=pyglet_image.ImageData(wi.im.size[0],wi.im.size[1],"RGB",wi.im.tostring())
-
+	
+	# resize the image so the smallest dimension is config.crop_size
+	im = wi.im
+	w,h = im.size
+	s=0
+	if w > h:
+		s = 1.0*config.crop_size/h
+	else:
+		s = 1.0*config.crop_size/w
+	
+	w = int(w*s)
+	h = int(h*s) 	
+	
+	im.thumbnail((w, h), Image.ANTIALIAS)
+	
+	
+	# crop out the centre crop_size square to use a thumbnail
+	midx = w/2
+	midy = h/2
+		
+	box = (midx-config.crop_size/2, midy-config.crop_size/2, midx+config.crop_size/2, midy+config.crop_size/2)
+	im=im.crop(box)
+	
+	# make a pyglet image out of it
+	im = im.transpose(Image.FLIP_TOP_BOTTOM)
+	psurf=pyglet_image.ImageData(im.size[0],im.size[1],"RGB",im.tostring())
+	
+	# add to our dictionary
 	images[	unicode(file,'utf-8').encode('ascii', 'ignore')	] = (psurf, None, sig, wi.size)
 	
 def window_setup():
@@ -287,7 +311,7 @@ def main():
 				
 			if is_over_image(x,y,hoverx, hovery):
 				#pix_name = 	font.Text(ft, filename, hoverx, hovery+config.font_size+5)
-				pix_size = font.Text(ft, "%dx%d"%(image[3][0], image[3][0]), x+config.crop_size/2, y, halign=font.Text.CENTER)
+				pix_size = font.Text(ft, "%dx%d"%(image[3][0], image[3][0]), x+config.crop_size/2, y+3, halign=font.Text.CENTER)
 				pix_size.color = (1,1,1,1)
 				text_bg = image_pattern.create_image(config.crop_size, int(pix_size.height)	)
 				text_bg.blit(x,y)
