@@ -143,7 +143,7 @@ def on_resize(width, height):
 	global yoffset
 	global xoffset
 	global rows
-	global cols	
+	global cols 
 
 	p = xoffset/strip_width()
 	
@@ -258,7 +258,7 @@ def load_file(file):
 	psurf=pyglet_image.ImageData(im.size[0],im.size[1],"RGB",im.tostring())
 	
 	# add to our dictionary
-	images[	unicode(file,'utf-8').encode('ascii', 'ignore')	] = (psurf, None, sig, wi.size)
+	images[ unicode(file,'utf-8').encode('ascii', 'ignore') ] = (psurf, None, sig, wi.size)
 	
 def window_setup():
 	"""sets up our window"""
@@ -270,8 +270,6 @@ def window_setup():
 	win.push_handlers(on_mouse_press)
 	win.push_handlers(on_mouse_release)
 	win.push_handlers(on_mouse_motion)
-	
-	win.set_visible()
 	
 	return win
 	
@@ -315,16 +313,38 @@ def main():
 	global renderables
 	global fps_display
 	
+	win = window_setup()
+			
+	if len(sys.argv) < 2:
+		import Tkinter
+		import tkFileDialog
+
+		root = Tkinter.Tk()
+		root.withdraw()
+		dirname = tkFileDialog.askdirectory(parent=root,initialdir="~",title='Please select a directory')
+		
+		if len(dirname ) > 0:
+			import dircache
+			ls = dircache.listdir(dirname)
+			ls = list(ls)
+			dircache.annotate(dirname, ls)
+			
+			files = ["%s%s%s"%(dirname,os.path.sep,e) for e in ls if not e.endswith('/')]
+			
+		else:
+			exit(1)
+	else:		
+		files = sys.argv[1:]
+		
 	for baseline in config.baselines:
 		load_baseline(baseline)
-		
-	files = sys.argv[1:]
+			
 	for file in files:
 		load_file(file)
 	
 	update_renderables()
 			
-	win = window_setup()
+
 	ft = font_setup()
 	trash_setup()	
 	
@@ -335,7 +355,7 @@ def main():
 	
 	clock.set_fps_limit(30)
 	
-	
+	win.set_visible()
 	while not win.has_exit:
 		clock.tick()
 		win.dispatch_events()
