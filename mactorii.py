@@ -267,6 +267,7 @@ def main():
 	for file in files:
 		load_file(file)
 	
+	for baseline in config.baselines
 	win = window_setup()
 	ft = font_setup()
 	
