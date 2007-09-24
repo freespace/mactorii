@@ -264,11 +264,9 @@ def load_file(file):
 	
 	im.thumbnail((w, h), Image.ANTIALIAS)
 	
-	
 	# crop out the centre crop_size square to use a thumbnail
 	midx = w/2
 	midy = h/2
-		
 	box = (midx-config.crop_size/2, midy-config.crop_size/2, midx+config.crop_size/2, midy+config.crop_size/2)
 	im=im.crop(box)
 	
