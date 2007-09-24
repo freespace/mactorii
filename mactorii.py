@@ -172,7 +172,12 @@ def load_file(file):
 	global images
 	
 	print "processing file: %s"%(file)
-	wi = wavelet.open(file)
+	try:
+		wi = wavelet.open(file)
+	except:
+		print "can't load file: %s"%(file)
+		return
+		
 	sig = wi.signature()
 	
 	# resize the image so the smallest dimension is config.crop_size
@@ -261,8 +266,7 @@ def main():
 	files = sys.argv[1:]
 	for file in files:
 		load_file(file)
-		
-
+	
 	win = window_setup()
 	ft = font_setup()
 	
