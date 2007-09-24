@@ -57,11 +57,13 @@ def on_mouse_motion(x,y,dx,dy):
 def on_mouse_press(x, y, button, modifiers):
 	global images
 	global selected
+	global xoffset
 	
 	if hovering_over != None:
 		print "%s selected"%(hovering_over)
 		selected = images[hovering_over]
 		update_renderables()
+		xoffset = 0
 		
 def on_mouse_release(x,y,button, modifiers):
 	global clickx
@@ -182,8 +184,8 @@ def load_file(file):
 	else:
 		s = 1.0*config.crop_size/w
 	
-	w = int(w*s)
-	h = int(h*s) 	
+	w = int(w*s*1.2)
+	h = int(h*s*1.2)
 	
 	im.thumbnail((w, h), Image.ANTIALIAS)
 	
