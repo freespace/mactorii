@@ -138,6 +138,12 @@ def on_key_press(symbol, modifier):
 	if symbol == key.C:
 		cluster_renderables()
 		
+	if symbol == key.W and modifier == key.MOD_CTRL:
+		sys.exit(0)
+		
+	if symbol == key.Q and modifier == key.MOD_COMMAND:
+		sys.exit(0)
+		
 	if symbol == key.Q:
 		sys.exit(0)
 	
