@@ -333,7 +333,13 @@ def main():
 	global fps_display
 	global display_picture
 	
+	# first thing, load baselines
+	for baseline in config.baselines:
+		load_baseline(baseline)
+		
+	# order is important here. window_setup must be setup first! Likewise with font
 	win = window_setup()
+	ft = font_setup()
 	
 	root = Tkinter.Tk()
 	root.withdraw()
@@ -341,7 +347,6 @@ def main():
 		root.tk.call('console', 'hide')
 				
 	if len(sys.argv) < 2:
-		
 		dirname = tkFileDialog.askdirectory(parent=root,initialdir="~",title='Please select a directory')
 		
 			
@@ -356,17 +361,8 @@ def main():
 			sys.exit(1)
 	else:		
 		files = sys.argv[1:]
-		
-	for baseline in config.baselines:
-		load_baseline(baseline)
 			
-	for file in files:
-		load_file(file)
-	
-	update_renderables()
-			
-
-	ft = font_setup()
+	win.set_visible()
 	trash_setup()	
 	
 	assert win != None
@@ -377,11 +373,25 @@ def main():
 	clock.set_fps_limit(30)
 	
 	win.set_visible()
+	unloaded = list(files)
+	
 	while not win.has_exit:
 		clock.tick()
 		win.dispatch_events()
 		glClear(GL_COLOR_BUFFER_BIT)
 		
+		if len(unloaded) > 0:
+			f = unloaded.pop()
+			str = "Loading: %s"%(f)
+			t = font.Text(ft, str, 0, config.text_yoffset)
+			t.draw()			
+			win.flip()
+			load_file(f)
+			
+			if len(unloaded) == 0:
+				update_renderables()
+			continue
+			
 		if display_picture != None:
 			w = display_picture.width
 			h = display_picture.height
