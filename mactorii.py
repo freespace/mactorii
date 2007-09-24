@@ -139,7 +139,7 @@ def on_key_press(symbol, modifier):
 		cluster_renderables()
 		
 	if symbol == key.Q:
-		exit(0)
+		sys.exit(0)
 	
 	if symbol == key.V:
 		if display_picture != None:
@@ -387,8 +387,7 @@ def main():
 			
 		if len(unloaded) > 0:
 			f = unloaded.pop()
-			str = "Loading: %s"%(f)
-			t = font.Text(ft, str, 0, config.text_yoffset)
+			t = font.Text(ft, f, 0, config.text_yoffset)
 			t.draw()			
 			#win.flip()
 			
