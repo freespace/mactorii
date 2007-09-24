@@ -51,6 +51,8 @@ last_deleted = []
 
 fps_display = None
 
+display_picture = None
+
 def on_mouse_motion(x,y,dx,dy):
 	global hoverx
 	global hovery
@@ -96,7 +98,9 @@ def on_key_press(symbol, modifier):
 	global hovering_over
 	global last_deleted
 	global fps_display
-
+	global display_picture
+	global win
+	
 	if symbol == key.LEFT:
 		xmotion = 10
 		if modifier == key.MOD_SHIFT:
@@ -114,6 +118,8 @@ def on_key_press(symbol, modifier):
 			update_renderables()
 			shutil.move(hovering_over, "%s/%s"%(config.trash_dir, os.path.basename(hovering_over)))
 			last_deleted.append(hovering_over)
+			
+			display_picture = None
 		
 	if symbol == key.U and len(last_deleted) > 0:
 		last = last_deleted.pop()
@@ -132,7 +138,18 @@ def on_key_press(symbol, modifier):
 		
 	if symbol == key.Q:
 		exit(0)
-		
+	
+	if symbol == key.V:
+		if display_picture != None:
+			display_picture = None
+		elif hovering_over != None:
+			print "V"
+			im = Image.open(hovering_over)
+			im.thumbnail((win.width, win.height),Image.ANTIALIAS)
+			im = im.convert("RGB")
+			im = im.transpose(Image.FLIP_TOP_BOTTOM)
+			display_picture = pyglet_image.ImageData(im.size[0],im.size[1],"RGB",im.tostring())
+			
 def strip_width():
 	"""returns the width of the strip in pixels"""
 	global rows
@@ -312,6 +329,7 @@ def main():
 	global images
 	global renderables
 	global fps_display
+	global display_picture
 	
 	win = window_setup()
 			
@@ -361,6 +379,11 @@ def main():
 		win.dispatch_events()
 		glClear(GL_COLOR_BUFFER_BIT)
 		
+		if display_picture != None:
+			display_picture.blit(0,0)
+			win.flip()
+			continue
+			
 		if xmotion < 0:
 			if strip_width() + xoffset > win.width:
 				xoffset+=xmotion
