@@ -27,12 +27,16 @@ from pyglet import font
 files = None
 win = None
 images = dict()
+baselines = []
+
 renderables = None
 
 yoffset = 0
 xoffset = 0
-rows = 1
 xmotion = 0
+
+rows = 1
+cols = 1
 	
 clickx = 0
 clicky = 0
@@ -92,7 +96,7 @@ def on_key_press(symbol, modifier):
 	global hovering_over
 	global last_deleted
 	global fps_display
-	
+
 	if symbol == key.LEFT:
 		xmotion = 10
 		if modifier == key.MOD_SHIFT:
@@ -122,6 +126,13 @@ def on_key_press(symbol, modifier):
 			fps_display = None
 		else:
 			fps_display = clock.ClockDisplay()		
+			
+	if symbol == key.C:
+		cluster_renderables()
+		
+	if symbol == key.Q:
+		exit(0)
+		
 def strip_width():
 	"""returns the width of the strip in pixels"""
 	global rows
@@ -132,16 +143,52 @@ def on_resize(width, height):
 	global yoffset
 	global xoffset
 	global rows
-	
+	global cols	
+
 	p = xoffset/strip_width()
 	
 	rows = int(height/config.crop_size) 
+	cols = math.floor(len(files)/rows)+1
 	
 	yoffset = (height - rows * config.crop_size)/2
 	yoffset = height-yoffset-config.crop_size
 	
 	# compute the new xoffset
 	xoffset = p * strip_width()
+
+def signature_compare(sig1, sig2):
+	score=[]
+	for b in xrange(3):
+		score.append(config.weights[b]*len(sig1[b].intersection(sig2[b])))
+		
+	return sum(score)
+	
+def cluster_func(item):
+	global cols
+	global rows
+	
+	item_sig = item[1][2]
+	
+	mul = 113
+	score = 0
+	for sig in baselines:
+		score += signature_compare(sig, item_sig)
+		score*=mul
+		
+	return score
+	
+def cluster_renderables():
+	"""cluster renderables by their score against the 2 base lines"""
+	global images
+	global renderables
+	
+	renderables = images.items()
+	
+	# sort the renderables
+	renderables.sort(key=cluster_func)
+	
+	#for i, r in enumerate(renderables):
+		
 	
 def update_renderables():
 	global images
@@ -152,20 +199,24 @@ def update_renderables():
 	
 	if selected != None:
 		renderables.sort(key=sort_func)
-		
-	return renderables
-	
+
 def sort_func(item):
 	assert selected != None
 	
 	selected_sig = selected[2]
 	item_sig = item[1][2]
 	
-	score = []
-	for b in xrange(3):
-		score.append(config.weights[b]*len(selected_sig[b].intersection(item_sig[b])))
-	return -sum(score)
+	return -signature_compare(selected_sig, item_sig)
 
+def load_baseline(file):
+	"""loads baseline pictures"""
+	global baselines
+	
+	print "processing baseline: %s"%(file)
+	wi = wavelet.open(file)
+	sig = wi.signature()
+	baselines.append(sig)
+	
 def load_file(file):
 	"""loads the files given in the command line"""
 	
@@ -251,6 +302,7 @@ def main():
 	global xmotion
 	global yoffset
 	global rows
+	global cols
 	global files
 	global win
 	global clickx
@@ -263,24 +315,26 @@ def main():
 	global renderables
 	global fps_display
 	
+	for baseline in config.baselines:
+		load_baseline(baseline)
+		
 	files = sys.argv[1:]
 	for file in files:
 		load_file(file)
 	
-	for baseline in config.baselines
+	update_renderables()
+			
 	win = window_setup()
 	ft = font_setup()
+	trash_setup()	
 	
 	assert win != None
 	assert ft != None
-	
-	trash_setup()
 	
 	image_pattern = pyglet_image.SolidColorImagePattern((0,0,0,1))
 	
 	clock.set_fps_limit(30)
 	
-	renderables = update_renderables()
 	
 	while not win.has_exit:
 		clock.tick()

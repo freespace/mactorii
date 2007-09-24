@@ -19,7 +19,8 @@ font_size=12
 font_name="Monaco"
 trash_dir = ".mactorii-trash"
 text_yoffset = 3
-baselines=("baseline/b1.jpg", "baseline/b2.jpg")
+baselines=(	#"baseline/b1.jpg", "baseline/b2.jpg", "baseline/b5.jpg",
+			"baseline/b3.jpg", "baseline/b4.jpg", "baseline/b6.jpg","baseline/b7.jpg")
 
 def main():
 	pass

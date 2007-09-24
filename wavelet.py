@@ -81,8 +81,13 @@ class WaveletImage(object):
 			
 			# sort the values to determine upper and lower cut offs for significance
 			tmp.sort()
-			lower = tmp[config.taps/2]
-			upper = tmp[length-config.taps/2]
+			
+			if length > config.taps:
+				lower = tmp[config.taps/2]
+				upper = tmp[length-config.taps/2]
+			else:
+				lower = tmp[length/4]
+				upper = tmp[length-length/4]
 		
 			# keep up to config.taps number of significant values, storing only their 
 			# position and sign
