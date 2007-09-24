@@ -55,12 +55,13 @@ def on_mouse_motion(x,y,dx,dy):
 	hovery = y
 	
 def on_mouse_press(x, y, button, modifiers):
-	global clickx
-	global clicky
+	global images
+	global selected
 	
-	if button == mouse.LEFT:
-		clickx = x
-		clicky = y
+	if hovering_over != None:
+		print "%s selected"%(hovering_over)
+		selected = images[hovering_over]
+		update_renderables()
 		
 def on_mouse_release(x,y,button, modifiers):
 	global clickx
@@ -291,46 +292,48 @@ def main():
 		y = yoffset
 		pix_name = None
 		pix_size = None
-		
 		drawn = 0
 		hovering_over = None
+		blit_position = ()
 		for filename, image in renderables:
 			img = image[0]
 			img.blit(x,y)
-			
-			if is_over_image(x,y,clickx, clicky):
-				print "%s selected"%(filename)
-				selected = image
-				renderables = update_renderables()
-				
-				clickx = -1
-				clicky = -1
-				
-				xoffset = 0
-				break
-				
+							
 			if is_over_image(x,y,hoverx, hovery):
-				#pix_name = 	font.Text(ft, filename, hoverx, hovery+config.font_size+5)
-				pix_size = font.Text(ft, "%dx%d"%(image[3][0], image[3][0]), x+config.crop_size/2, y+3, halign=font.Text.CENTER)
-				pix_size.color = (1,1,1,1)
-				text_bg = image_pattern.create_image(config.crop_size, int(pix_size.height)	)
-				text_bg.blit(x,y)
+				# draw some information
+				pix_size = font.Text(ft,"%dx%d"%(image[3][0], image[3][0]), x, y+config.text_yoffset)
+				pix_name = font.Text(ft, os.path.basename(filename), x, y+config.text_yoffset+int(pix_size.height))						
+
+				w = pix_size.width
+				if pix_name.width > pix_size.width:
+					w = pix_name.width
+					
+				if w < config.crop_size:
+					w = config.crop_size
+				else:
+					w = math.ceil(w/config.crop_size)*config.crop_size
+						
+				w = int(w)
+				h = int(pix_name.height+pix_size.height+config.text_yoffset)
+				text_bg = image_pattern.create_image(w,h)
+				blit_position=(x, y)
+				
 				hovering_over = filename
 
-				
 			drawn+=1
 			y-=config.crop_size
 			
 			if drawn % rows == 0:
 				x+=config.crop_size
 				y = yoffset
-		if pix_name:
-			pix_name.draw()		
-		if pix_size:
-			pix_size.draw()
+
 		if fps_display:
 			fps_display.draw()
-				
+		if hovering_over:
+			text_bg.blit(blit_position[0], blit_position[1])
+			pix_name.draw()
+			pix_size.draw()
+			
 		win.flip()
 	
 if __name__ == '__main__':

@@ -18,7 +18,7 @@ tmp_file=".89885e5234e2f0ae1e2015642425d1eb.jpg"
 font_size=12
 font_name="Monaco"
 trash_dir = ".mactorii-trash"
-
+text_yoffset = 3
 def main():
 	pass
 
