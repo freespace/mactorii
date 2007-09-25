@@ -64,10 +64,8 @@ def on_mouse_motion(x,y,dx,dy):
 	hoverx = x
 	hovery = y
 	
-def on_mouse_press(x, y, button, modifiers):
-	global images
-	global selected
-	global xoffset
+def toggle_full_view():
+	"""enters into full view if possible"""
 	global hovering_over
 	global display_picture
 	
@@ -79,9 +77,11 @@ def on_mouse_press(x, y, button, modifiers):
 			im.thumbnail((win.width, win.height),Image.ANTIALIAS)
 			im = im.convert("RGB")
 			im = im.transpose(Image.FLIP_TOP_BOTTOM)
-			
+		
 			display_picture = pyglet_image.ImageData(im.size[0],im.size[1],"RGB",im.tostring())
 		
+def on_mouse_press(x, y, button, modifiers):
+	toggle_full_view()
 		
 def on_mouse_release(x,y,button, modifiers):
 	global clickx
@@ -161,6 +161,9 @@ def on_key_press(symbol, modifier):
 	if symbol == key.Q:
 		sys.exit(0)
 	
+	if symbol == key.V:
+		toggle_full_view()
+		
 	if symbol == key.S:
 		if hovering_over != None:
 			print "sorting by %s"%(hovering_over)
