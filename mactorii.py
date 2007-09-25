@@ -68,12 +68,20 @@ def on_mouse_press(x, y, button, modifiers):
 	global images
 	global selected
 	global xoffset
+	global hovering_over
+	global display_picture
 	
 	if hovering_over != None:
-		print "%s selected"%(hovering_over)
-		selected = images[hovering_over]
-		update_renderables()
-		xoffset = 0
+		if display_picture != None:
+			display_picture = None
+		elif hovering_over != None:
+			im = Image.open(hovering_over)
+			im.thumbnail((win.width, win.height),Image.ANTIALIAS)
+			im = im.convert("RGB")
+			im = im.transpose(Image.FLIP_TOP_BOTTOM)
+			
+			display_picture = pyglet_image.ImageData(im.size[0],im.size[1],"RGB",im.tostring())
+		
 		
 def on_mouse_release(x,y,button, modifiers):
 	global clickx
@@ -107,6 +115,7 @@ def on_key_press(symbol, modifier):
 	global files
 	global unloaded
 	global root
+	global selected
 	
 	if symbol == key.LEFT:
 		xmotion = 10
@@ -152,16 +161,12 @@ def on_key_press(symbol, modifier):
 	if symbol == key.Q:
 		sys.exit(0)
 	
-	if symbol == key.V:
-		if display_picture != None:
-			display_picture = None
-		elif hovering_over != None:
-			im = Image.open(hovering_over)
-			im.thumbnail((win.width, win.height),Image.ANTIALIAS)
-			im = im.convert("RGB")
-			im = im.transpose(Image.FLIP_TOP_BOTTOM)
-			
-			display_picture = pyglet_image.ImageData(im.size[0],im.size[1],"RGB",im.tostring())
+	if symbol == key.S:
+		if hovering_over != None:
+			print "sorting by %s"%(hovering_over)
+			selected = images[hovering_over]
+			update_renderables()
+			xoffset = 0
 	
 	if symbol == key.O:
 		dirname = tkFileDialog.askdirectory(parent=root,initialdir="~",title='Please select a directory')
