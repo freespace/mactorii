@@ -432,7 +432,7 @@ def main():
 			
 		if len(unloaded) > 0:
 			f = unloaded.pop()
-			t = font.Text(ft, to_unicode(f), 0, config.text_yoffset)
+			t = font.Text(ft, to_unicode(f), config.text_yoffset, config.text_yoffset)
 			t.draw()			
 			#win.flip()
 			

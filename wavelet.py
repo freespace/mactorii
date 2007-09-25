@@ -12,7 +12,7 @@ import os
 import Image
 
 import config
-import pyx
+#import pyx
 
 def open(path):
 	"""opens a file as a WaveletImage"""
@@ -139,8 +139,8 @@ class WaveletImage(object):
 		assert self.data != None, "Did you call .cleanup() before .signature()?"
 		input = list(self.data)
 		
-		#self.wavelets = self.transform_array(input)
-		self.wavelets = pyx.pyx_transform_array(input)
+		self.wavelets = self.transform_array(input)
+		#self.wavelets = pyx.pyx_transform_array(input)
 		return
 		
 		rows, cols = self.im.size
