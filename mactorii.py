@@ -211,6 +211,9 @@ def on_resize(width, height):
 	
 	# compute the new xoffset
 	xoffset = p * strip_width()
+	
+	toggle_full_view()
+	toggle_full_view()
 
 def signature_compare(sig1, sig2):
 	score=[]
@@ -312,9 +315,12 @@ def load_file(file):
 	psurf=pyglet_image.ImageData(im.size[0],im.size[1],"RGB",im.tostring())
 	
 	# add to our dictionary
-	images[ unicode(file,'utf-8').encode('ascii', 'ignore') ] = (psurf, None, sig, wi.size)
+	images[ file ] = (psurf, None, sig, wi.size)
 	
-def window_setup():
+def to_unicode(str):
+	return unicode(str, 'utf-8', 'ignore').encode('utf_16_le', 'ignore')
+	
+def setup_window():
 	"""sets up our window"""
 	win = window.Window(resizable=True, visible=False)
 	
@@ -327,7 +333,7 @@ def window_setup():
 	
 	return win
 	
-def font_setup():
+def setup_font():
 	"""sets up fonts"""
 	return font.load(config.font_name, config.font_size, bold=True)
 
@@ -343,7 +349,7 @@ def is_over_image(x, y, mousex, mousey):
 				
 	return True
 	
-def trash_setup():
+def setup_trash():
 	try:
 		os.mkdir(config.trash_dir)
 	except:
@@ -370,9 +376,9 @@ def main():
 	global unloaded
 	global root
 		
-	# order is important here. window_setup must be setup first! Likewise with font
-	win = window_setup()
-	ft = font_setup()
+	# order is important here. setup_window must be setup first! Likewise with font
+	win = setup_window()
+	ft = setup_font()
 	
 	root = Tkinter.Tk()
 	root.withdraw()
@@ -382,8 +388,7 @@ def main():
 				
 	if len(sys.argv) < 2:
 		dirname = tkFileDialog.askdirectory(parent=root,initialdir="~",title='Please select a directory')
-		
-			
+					
 		if len(dirname ) > 0:
 			import dircache
 			ls = dircache.listdir(dirname)
@@ -397,7 +402,7 @@ def main():
 		files = sys.argv[1:]
 			
 	win.set_visible()
-	trash_setup()	
+	setup_trash()	
 	
 	assert win != None
 	assert ft != None
@@ -427,7 +432,7 @@ def main():
 			
 		if len(unloaded) > 0:
 			f = unloaded.pop()
-			t = font.Text(ft, f, 0, config.text_yoffset)
+			t = font.Text(ft, to_unicode(f), 0, config.text_yoffset)
 			t.draw()			
 			#win.flip()
 			
@@ -466,7 +471,7 @@ def main():
 			if is_over_image(x,y,hoverx, hovery):
 				# draw some information
 				pix_size = font.Text(ft,"%dx%d"%(image[3][0], image[3][1]), x, y+config.text_yoffset)
-				pix_name = font.Text(ft, os.path.basename(filename), x, y+config.text_yoffset+int(pix_size.height))						
+				pix_name = font.Text(ft, to_unicode(os.path.basename(filename)), x, y+config.text_yoffset+int(pix_size.height))						
 
 				w = pix_size.width
 				if pix_name.width > pix_size.width:
