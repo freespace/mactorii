@@ -26,6 +26,8 @@ from pyglet.window import key
 from pyglet.window import mouse
 from pyglet import font
 
+renderables_key_func = lambda x : 0
+
 files = None
 win = None
 images = dict()
@@ -116,6 +118,7 @@ def on_key_press(symbol, modifier):
 	global unloaded
 	global root
 	global selected
+	global renderables_key_func
 	
 	if symbol == key.LEFT:
 		xmotion = 10
@@ -168,6 +171,7 @@ def on_key_press(symbol, modifier):
 		if hovering_over != None:
 			print "sorting by %s"%(hovering_over)
 			selected = images[hovering_over]
+			renderables_key_func = sort_func
 			update_renderables()
 			xoffset = 0
 	
@@ -226,7 +230,7 @@ def cluster_func(item):
 	global cols
 	global rows
 	
-	item_sig = item[1][2]
+	item_sig = images[item[0]][1]
 	
 	mul = 113
 	score = 0
@@ -236,34 +240,42 @@ def cluster_func(item):
 		
 	return score
 	
+def images_to_renderables(images):
+	"""returns images.items() as a set, minus sig data, which is set to zero"""
+	return list( [(t[0],(t[1][0], t[1][2])) for t in images.items()])
+
 def cluster_renderables():
 	"""cluster renderables by their score against the 2 base lines"""
-	global images
-	global renderables
+	global renderables_key_func
 	
-	renderables = images.items()
-	
-	# sort the renderables
-	renderables.sort(key=cluster_func)
-	
-	#for i, r in enumerate(renderables):
-		
+	renderables_key_func = cluster_func
+	update_renderables()
 	
 def update_renderables():
 	global images
 	global renderables
 	global selected
+	global renderables_key_func
 	
-	renderables = images.items()
-	
-	if selected != None:
-		renderables.sort(key=sort_func)
+	if renderables:
+		n = images_to_renderables(images)
+		if len(n) > len(renderables):
+			# images were added, so just re-assign renderables
+			renderables = n
+		elif len(n) < len(renderables):
+			# images were removed, we need to remove them from renderables too
+			renderables = n
+			
+	else:
+		renderables = images_to_renderables(images)
+		
+	renderables.sort(key=renderables_key_func)
 
 def sort_func(item):
 	assert selected != None
 	
-	selected_sig = selected[2]
-	item_sig = item[1][2]
+	selected_sig = selected[1]
+	item_sig = images[item[0]][1]
 	
 	return -signature_compare(selected_sig, item_sig)
 
@@ -315,7 +327,7 @@ def load_file(file):
 	psurf=pyglet_image.ImageData(im.size[0],im.size[1],"RGB",im.tostring())
 	
 	# add to our dictionary
-	images[ file ] = (psurf, None, sig, wi.size)
+	images[ file ] = (psurf, sig, wi.size)
 	
 def to_unicode(s):
 	return unicode(s, 'utf-8', 'ignore')
@@ -471,7 +483,7 @@ def main():
 							
 			if is_over_image(x,y,hoverx, hovery):
 				# draw some information
-				pix_size = font.Text(ft,"%dx%d"%(image[3][0], image[3][1]), x, y+config.text_yoffset)
+				pix_size = font.Text(ft,"%dx%d"%(image[1][0], image[1][1]), x, y+config.text_yoffset)
 				pix_name = font.Text(ft, to_unicode(os.path.basename(filename)), x, y+config.text_yoffset+int(pix_size.height))						
 
 				w = pix_size.width
