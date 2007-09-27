@@ -21,6 +21,8 @@ trash_dir = ".mactorii-trash"
 text_yoffset = 3
 baselines=(	#"baseline/b1.jpg", "baseline/b2.jpg", "baseline/b5.jpg",
 			"baseline/b3.jpg", "baseline/b4.jpg", "baseline/b6.jpg","baseline/b7.jpg")
+fps = 16
+xmotion_time = 0.03
 
 def main():
 	pass

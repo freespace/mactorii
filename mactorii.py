@@ -317,8 +317,8 @@ def load_file(file):
 	# add to our dictionary
 	images[ file ] = (psurf, None, sig, wi.size)
 	
-def to_unicode(str):
-	return unicode(str, 'utf-8', 'ignore').encode('utf_16_le', 'ignore')
+def to_unicode(s):
+	return unicode(s, 'utf-8', 'ignore')
 	
 def setup_window():
 	"""sets up our window"""
@@ -409,14 +409,15 @@ def main():
 	
 	image_pattern = pyglet_image.SolidColorImagePattern((0,0,0,1))
 	
-	clock.set_fps_limit(30)
+	clock.set_fps_limit(config.fps)
 	
 	win.set_visible()
 	unloaded = list(files)
 	unloaded_baselines = list(config.baselines)
 	
 	while not win.has_exit:
-		clock.tick()
+		time_passed = clock.tick()
+		
 		win.dispatch_events()
 		glClear(GL_COLOR_BUFFER_BIT)
 		
@@ -451,11 +452,11 @@ def main():
 			
 		if xmotion < 0:
 			if strip_width() + xoffset > win.width:
-				xoffset+=xmotion
+				xoffset+=xmotion * time_passed / config.xmotion_time 
 				
 		if xmotion > 0:
 			if xoffset < 0:
-				xoffset+=xmotion
+				xoffset+=xmotion * time_passed / config.xmotion_time 
 				
 		x = xoffset 
 		y = yoffset
