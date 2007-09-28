@@ -124,22 +124,24 @@ class WaveletImage(object):
 		"""Performs wavelet transform on the input, destorys input"""
 		length = len(input)
 		output = [0]*length
-	
+		
 		if length%2:
 			length-=1
-	
+		
 		while(True):
 			length/=2
+			
 			for i in xrange(length):
 				s = self.pix_sum(input[i*2], input[i*2+1])
 				d = self.pix_diff(input[i*2], input[i*2+1])
+				
 				output[i] = s
 				output[length+i] = d
 				
 			if length == 1:
 				return output
 			else:
-				input = list(output)
+				input = output[:length*2]
 
 		raise Exception
 		
