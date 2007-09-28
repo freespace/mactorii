@@ -11,19 +11,26 @@ import sys
 import os
 
 taps = 96
-weights = (1, 0.5, 0.25)
-img_size = (256, 256)
-crop_size= 100
+weights = (100, 70, 50)
+img_size = (128, 128)
+crop_size= 90
 tmp_file=".89885e5234e2f0ae1e2015642425d1eb.jpg"
 font_size=12
 font_name="Monaco"
 trash_dir = ".mactorii-trash"
 text_yoffset = 3
-baselines=(	#"baseline/b1.jpg", "baseline/b2.jpg", "baseline/b5.jpg",
-			"baseline/b3.jpg", "baseline/b4.jpg", "baseline/b6.jpg","baseline/b7.jpg")
+baselines=(	
+			#"baseline/b1.jpg", 
+			"baseline/b2.jpg", 
+			#"baseline/b3.jpg",
+			"baseline/b4.jpg", 
+			"baseline/b5.jpg", 
+			"baseline/b6.jpg",
+			"baseline/b7.jpg"
+			)
 fps = 16
 xmotion_time = 0.03
-
+bands = 3
 def main():
 	pass
 

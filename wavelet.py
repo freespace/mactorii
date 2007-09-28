@@ -27,17 +27,24 @@ class WaveletImage(object):
 		Load the image from given path, using PIL, converts it into YIQ colour space
 		"""
 		rgb2yiq = (
-			0.299,	 0.587,	 0.114,	0,
-			0.595716,	-0.274453,	-0.321263,	0,
-			0.211456,	-0.522591,	 0.311135, 	0
+			 0.299,	 0.587,	 0.114,	0,
+			 0.595716,	-0.274453,	-0.321263,	0,
+			 0.211456,	-0.522591,	 0.311135, 	0
+			)
+			
+		rgb2yuv = (
+			 0.299,	 0.587,	 0.114,	 0,
+			-0.14713,	 -0.28886,	 0.436,	 0,
+			 0.615,	-0.51498,	-0.10001,	 0,
 			)
 			
 		im = Image.open(path)
 		self.size = im.size
-		im.thumbnail(config.img_size)
+		im.thumbnail(config.img_size,Image.ANTIALIAS)
 		im = im.convert("RGB")
 		
 		self.data = im.convert("RGB", rgb2yiq).getdata()
+		#self.data = im.convert("RGB", rgb2yuv).getdata()
 		self.im = im
 		self.wavelets = None
 		self.sig = None
@@ -52,11 +59,11 @@ class WaveletImage(object):
 		
 	def pix_sum(self, x,y):
 		"""Returns a tuple which is the sum of the tuples given"""
-		return ((x[0])+y[0], x[1]+y[1], x[2]+y[2])
+		return (x[0]+y[0], x[1]+y[1], x[2]+y[2])
 	
 	def pix_diff(self, x,y):
 		"""Returns a tuple which is the difference of the tuples given"""
-		return ((x[0])-y[0], x[1]-y[1], x[2]-y[2])
+		return (x[0]-y[0], x[1]-y[1], x[2]-y[2])
 	
 	def signature(self):
 		"""Returns a signature tuple based on the input which is expected to be the
@@ -92,6 +99,9 @@ class WaveletImage(object):
 			# keep up to config.taps number of significant values, storing only their 
 			# position and sign
 			for i in xrange(length):
+				if i <1:
+					continue
+					
 				val = input[i][band]
 				if val > upper or val < lower:
 					if len(sig[band]) <= config.taps:
@@ -129,7 +139,8 @@ class WaveletImage(object):
 			if length == 1:
 				return output
 			else:
-				input = output
+				input = list(output)
+
 		raise Exception
 		
 	def transform(self):

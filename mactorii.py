@@ -235,8 +235,7 @@ def cluster_func(item):
 	mul = 113
 	score = 0
 	for sig in baselines:
-		score += signature_compare(sig, item_sig)
-		score*=mul
+		score += signature_compare(sig, item_sig)**3
 		
 	return score
 	
@@ -302,19 +301,21 @@ def load_file(file):
 		
 	sig = wi.signature()
 	
-	# resize the image so the smallest dimension is config.crop_size
+	# get the pre-loaded image from wavelet
 	im = wi.im
 	w,h = im.size
-	s=0
-	if w > h:
-		s = 1.0*config.crop_size/h
-	else:
-		s = 1.0*config.crop_size/w
 	
-	w = int(w*s*1.2)
-	h = int(h*s*1.2)
-	
-	im.thumbnail((w, h), Image.ANTIALIAS)
+	# resize the image so the smallest dimension is config.crop_size
+	# s=0
+	# if w > h:
+	# 	s = 1.0*config.crop_size/h
+	# else:
+	# 	s = 1.0*config.crop_size/w
+	# 
+	# w = int(w*s*1.0)
+	# h = int(h*s*1.0)
+	# 
+	# im.thumbnail((w, h), Image.ANTIALIAS)
 	
 	# crop out the centre crop_size square to use a thumbnail
 	midx = w/2
@@ -366,6 +367,18 @@ def setup_trash():
 		os.mkdir(config.trash_dir)
 	except:
 		return
+	
+def find_common_signature(signatures):
+	common_sig = [set()]*config.bands
+	
+	for i in xrange(len(signatures)):
+		for b in xrange(config.bands):
+			if i == 0:
+				common_sig[b] = signatures[i][b]
+			else:
+				common_sig[b] = common_sig[b].intersection(signatures[i-1][b])
+							
+	return common_sig
 	
 def main():
 	global xoffset
@@ -454,6 +467,12 @@ def main():
 			#if len(unloaded) == 0:
 			update_renderables()
 			#continue
+			
+			# if len(unloaded) == 0:
+			# 				print find_common_signature([v[1] for v in images.values()])
+		else:
+			#raise Exception
+			pass
 			
 		if display_picture != None:
 			w = display_picture.width
