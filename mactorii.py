@@ -292,7 +292,8 @@ def load_file(file):
 	
 	global images
 	
-	print "processing file: %s"%(file)
+	#print "processing file: %s"%(file)
+	
 	try:
 		wi = wavelet.open(file)
 	except:
@@ -439,7 +440,7 @@ def main():
 	win.set_visible()
 	unloaded = list(files)
 	unloaded_baselines = list(config.baselines)
-	
+	update_renderables()
 	while not win.has_exit:
 		time_passed = clock.tick()
 		
@@ -464,14 +465,12 @@ def main():
 			
 			load_file(f)
 			
-			#if len(unloaded) == 0:
-			update_renderables()
+			if len(unloaded) %3 == 0:
+				update_renderables()
 			#continue
 			
-			# if len(unloaded) == 0:
-			# 				print find_common_signature([v[1] for v in images.values()])
 		else:
-			#raise Exception
+			# raise Exception
 			pass
 			
 		if display_picture != None:
@@ -488,7 +487,9 @@ def main():
 		if xmotion > 0:
 			if xoffset < 0:
 				xoffset+=xmotion * time_passed / config.xmotion_time 
-				
+		if xoffset > 0:
+			xoffset = 0
+					
 		x = xoffset 
 		y = yoffset
 		pix_name = None
@@ -498,28 +499,30 @@ def main():
 		blit_position = ()
 		for filename, image in renderables:
 			img = image[0]
-			img.blit(x,y)
-							
-			if is_over_image(x,y,hoverx, hovery):
-				# draw some information
-				pix_size = font.Text(ft,"%dx%d"%(image[1][0], image[1][1]), x, y+config.text_yoffset)
-				pix_name = font.Text(ft, to_unicode(os.path.basename(filename)), x, y+config.text_yoffset+int(pix_size.height))						
-
-				w = pix_size.width
-				if pix_name.width > pix_size.width:
-					w = pix_name.width
-					
-				if w < config.crop_size:
-					w = config.crop_size
-				else:
-					w = math.ceil(w/config.crop_size)*config.crop_size
-						
-				w = int(w)
-				h = int(pix_name.height+pix_size.height+config.text_yoffset)
-				text_bg = image_pattern.create_image(w,h)
-				blit_position=(x, y)
+			
+			if ( x >= 0 and x < win.width):
+				img.blit(x,y)				
 				
-				hovering_over = filename
+				if is_over_image(x,y,hoverx, hovery):
+					# draw some information
+					pix_size = font.Text(ft,"%dx%d"%(image[1][0], image[1][1]), x, y+config.text_yoffset)
+					pix_name = font.Text(ft, to_unicode(os.path.basename(filename)), x, y+config.text_yoffset+int(pix_size.height))						
+
+					w = pix_size.width
+					if pix_name.width > pix_size.width:
+						w = pix_name.width
+					
+					if w < config.crop_size:
+						w = config.crop_size
+					else:
+						w = math.ceil(w/config.crop_size)*config.crop_size
+						
+					w = int(w)
+					h = int(pix_name.height+pix_size.height+config.text_yoffset)
+					text_bg = image_pattern.create_image(w,h)
+					blit_position=(x, y)
+				
+					hovering_over = filename
 
 			drawn+=1
 			y-=config.crop_size

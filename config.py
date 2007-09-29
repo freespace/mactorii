@@ -13,7 +13,7 @@ import os
 taps = 96
 weights = (100, 70, 50)
 img_size = (128, 128)
-crop_size= 90
+crop_size= 90	
 tmp_file=".89885e5234e2f0ae1e2015642425d1eb.jpg"
 font_size=12
 font_name="Monaco"
