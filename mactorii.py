@@ -227,15 +227,13 @@ def signature_compare(sig1, sig2):
 	return sum(score)
 	
 def cluster_func(item):
-	global cols
-	global rows
+	global baselines
 	
 	item_sig = images[item[0]][1]
 	
-	mul = 113
 	score = 0
 	for sig in baselines:
-		score += signature_compare(sig, item_sig)**3
+		score += signature_compare(sig, item_sig)**5
 		
 	return score
 	
