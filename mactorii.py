@@ -14,6 +14,7 @@ import Image
 import shutil
 import Tkinter
 import tkFileDialog
+import time
 
 import wavelet
 import config
@@ -122,13 +123,12 @@ def on_key_press(symbol, modifier):
 	
 	if symbol == key.LEFT:
 		xmotion = 10
-		if modifier == key.MOD_SHIFT:
-			xmotion*=2
 				
 	if symbol == key.RIGHT:
 		xmotion -= 10
-		if modifier == key.MOD_SHIFT:
-			xmotion*=2	
+
+	if modifier == key.MOD_SHIFT:
+		xmotion*=4
 
 	if hovering_over != None:
 		if symbol == key.D:
@@ -250,7 +250,7 @@ def cluster_renderables():
 	renderables_key_func = cluster_func
 	update_renderables()
 	
-def update_renderables():
+def update_renderables(sort=True):
 	global images
 	global renderables
 	global selected
@@ -268,7 +268,8 @@ def update_renderables():
 	else:
 		renderables = images_to_renderables(images)
 		
-	renderables.sort(key=renderables_key_func)
+	if sort:
+		renderables.sort(key=renderables_key_func)
 
 def sort_func(item):
 	assert selected != None
@@ -282,7 +283,7 @@ def load_baseline(file):
 	"""loads baseline pictures"""
 	global baselines
 	
-	print "processing baseline: %s"%(file)
+#	print "processing baseline: %s"%(file)
 	wi = wavelet.open(file)
 	sig = wi.signature()
 	baselines.append(sig)
@@ -305,18 +306,18 @@ def load_file(file):
 	# get the pre-loaded image from wavelet
 	im = wi.im
 	w,h = im.size
+
+	# resize the image so the smallest dimension is config.crop_size	
+	s=0
+	if w > h:
+		s = 1.0*config.crop_size/h
+	else:
+		s = 1.0*config.crop_size/w
 	
-	# resize the image so the smallest dimension is config.crop_size
-	# s=0
-	# if w > h:
-	# 	s = 1.0*config.crop_size/h
-	# else:
-	# 	s = 1.0*config.crop_size/w
-	# 
-	# w = int(w*s*1.0)
-	# h = int(h*s*1.0)
-	# 
-	# im.thumbnail((w, h), Image.ANTIALIAS)
+	w = int(w*s*1.3)
+	h = int(h*s*1.3)
+
+	im=im.resize((w, h), Image.ANTIALIAS)
 	
 	# crop out the centre crop_size square to use a thumbnail
 	midx = w/2
@@ -440,7 +441,10 @@ def main():
 	win.set_visible()
 	unloaded = list(files)
 	unloaded_baselines = list(config.baselines)
+	
 	update_renderables()
+	print "loading %d files"%(len(unloaded))
+	start_time = time.time()
 	while not win.has_exit:
 		time_passed = clock.tick()
 		
@@ -466,9 +470,11 @@ def main():
 			load_file(f)
 			
 			if len(unloaded) %3 == 0:
-				update_renderables()
-			#continue
-			
+				update_renderables(sort=False)
+
+			if len(unloaded) == 0:
+				print "loading took %f seconds"%(time.time()-start_time)
+				
 		else:
 			# raise Exception
 			pass
@@ -500,7 +506,7 @@ def main():
 		for filename, image in renderables:
 			img = image[0]
 			
-			if ( x >= 0 and x < win.width):
+			if ( x >= -config.crop_size and x < win.width):
 				img.blit(x,y)				
 				
 				if is_over_image(x,y,hoverx, hovery):
