@@ -12,6 +12,7 @@ import os
 import Image
 
 import config
+
 #import pyx
 
 def open(path):
@@ -139,9 +140,9 @@ class WaveletImage(object):
 			tmp.sort(key = lambda x: x[0])
 			
 			if length > config.taps:
-				sig[band] = tmp[:config.taps]
+				sig[band] = tmp[:-config.taps]
 			else:
-				sig[band] = tmp[:length]
+				sig[band] = tmp[-length:]
 		
 			for s in sig[band]:
 				v = s[0]
@@ -159,9 +160,6 @@ class WaveletImage(object):
 		length = len(input)
 		output = [0]*length
 		
-		if length%2:
-			length-=1
-				
 		while(True):
 			length/=2
 			
