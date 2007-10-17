@@ -140,13 +140,17 @@ class WaveletImage(object):
 			# coefficients
 			tmp.sort(key = lambda x: x[0]*x[0])
 			
+			# this method is not identical to signature() because signature() is first 
+			# come first serve, it takes the low location value coefficients first,
+			# while this doesn't. 
+			
 			# take config.taps number of significan coefficients if we have enough
 			if length > config.taps:
 				sig[band] = tmp[-config.taps:]
 			else:
 				# otherwise take the entire tmp
 				sig[band] = tmp[:]
-		
+			
 			# normalise the signatures, research shows this is better
 			tmpsig = []*len(sig[band])
 			for s in sig[band]:
