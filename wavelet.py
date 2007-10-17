@@ -136,14 +136,19 @@ class WaveletImage(object):
 			for i in xrange(length):
 				tmp[i] = (input[i][band], i)
 			
-			# sort the values to determine upper and lower cut offs for significance
-			tmp.sort(key = lambda x: x[0])
+			# sorting by x[0]^2 because we want both negative and positive significant
+			# coefficients
+			tmp.sort(key = lambda x: x[0]*x[0])
 			
+			# take config.taps number of significan coefficients if we have enough
 			if length > config.taps:
-				sig[band] = tmp[:-config.taps]
+				sig[band] = tmp[-config.taps:]
 			else:
-				sig[band] = tmp[-length:]
+				# otherwise take the entire tmp
+				sig[band] = tmp[:]
 		
+			# normalise the signatures, research shows this is better
+			tmpsig = []*len(sig[band])
 			for s in sig[band]:
 				v = s[0]
 				l = s[1]
@@ -152,7 +157,10 @@ class WaveletImage(object):
 				elif v < 0:
 					v = -1
 				s = (l,v)
-				
+				tmpsig.append(s)
+			sig[band]=tmpsig[:]
+			# print sig[band]
+			
 		return set(sig[0]), set(sig[1]), set(sig[2])
 	
 	def transform_array(self, input):
