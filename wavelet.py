@@ -5,6 +5,7 @@ wavelet.py
 
 Created by Shu Ning Bian on 2007-09-22.
 Copyright (c) 2007 . All rights reserved.
+Licensed for distribution under the GPL version 2, check COPYING for details.
 """
 
 import sys
