@@ -16,7 +16,7 @@ ez_setup.use_setuptools()
 
 APP = ['mactorii.py']
 DATA_FILES = [("baseline/",["baseline/b3.jpg", "baseline/b4.jpg", "baseline/b6.jpg","baseline/b7.jpg"])]
-OPTIONS = {'argv_emulation': True}
+OPTIONS = {'argv_emulation': True, 'iconfile': 'mactorii.icns'}
 
 if sys.platform == "darwin":
 	SETUP_REQUIRES=['py2app']
@@ -29,7 +29,7 @@ else:
 	INSTALL_REQUIRES = ['PIL', 'pyglet']
 	
 setup(
-   version='0.37',
+   version='0.52',
    description='Image browser with sort, cluster ability based on wavelet transforms',
    author='Shu Ning Bian',
    author_email='freespace@gmail.com',
