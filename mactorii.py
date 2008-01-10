@@ -508,7 +508,7 @@ def main():
 			if ( x >= -config.crop_size and x < win.width):
 				img.blit(x,y)				
 				
-				if is_over_image(x,y,hoverx, hovery):
+				if is_over_image(x,y,hoverx, hovery) and (not pix_name or filename != pix_name.text):
 					# draw some information
 					pix_size = font.Text(ft,"%dx%d"%(image[1][0], image[1][1]), x, y+config.text_yoffset)
 					pix_name = font.Text(ft, to_unicode(os.path.basename(filename)), x, y+config.text_yoffset+int(pix_size.height))						
