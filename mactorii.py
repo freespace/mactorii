@@ -10,8 +10,8 @@ Licensed for distribution under the GPL version 2, check COPYING for details.
 
 import sys
 import os
-import math
 import Image
+import math
 import shutil
 import Tkinter
 import tkFileDialog
@@ -547,4 +547,3 @@ def main():
 	
 if __name__ == '__main__':
 	main()
-
