@@ -6,6 +6,9 @@ wavelet.py
 Created by Shu Ning Bian on 2007-09-22.
 Copyright (c) 2007 . All rights reserved.
 Licensed for distribution under the GPL version 2, check COPYING for details.
+
+Signature returned by this class is a dictionary with key of (band, location) value of
+either 1 or -1. Location is z = y*columns + x.
 """
 
 import sys
@@ -49,7 +52,7 @@ class WaveletImage(object):
 		#self.data = im.convert("RGB", rgb2yuv).getdata()
 		self.im = im
 		self.wavelets = None
-		self.sig = None
+		self.signature = None
 	
 	def cleanup(self):
 		"""
@@ -67,109 +70,55 @@ class WaveletImage(object):
 		"""Returns a tuple which is the difference of the tuples given"""
 		return (x[0]-y[0], x[1]-y[1], x[2]-y[2])
 	
-	def signature(self):
-		"""Returns a signature tuple based on the input which is expected to be the
-		wavelet transform of an image
-		"""
-		
-		if not self.wavelets:
-			self.transform()
-
-		input = self.wavelets	
-		length=len(input)/8
-
-		sig=[[], [], []]
-		tmp=[0]*length
-
-		for band in xrange(3):
-			# copy the values in the current band into a tmp buffer
-			for i in xrange(length):
-				tmp[i] = input[i][band]
-
-			# sort the values to determine upper and lower cut offs for significance
-			tmp.sort()
-
-			if length > config.taps:
-				lower = tmp[config.taps/2]
-				upper = tmp[length-config.taps/2]
-			else:
-				lower = tmp[length/4]
-				upper = tmp[length-length/4]
-
-			# keep up to config.taps number of significant values, storing only their 
-			# position and sign
-			for i in xrange(length):
-				if i <1:
-					continue
-					
-				val = input[i][band]
-				if val > upper or val < lower:
-					if len(sig[band]) <= config.taps:
-						# clamp it to either 1 or -1 or 0
-						if val > 0:
-							val = 1
-						elif val < 0:
-							val = -1
-							
-						sig[band].append((i,val))
-					else:
-						# if more than the require number of signatures has been
-						# gathered for this band, break out
-						break
-
-		return set(sig[0]), set(sig[1]), set(sig[2])
-			
-	def signature2(self):
+	def get_signature(self):
 		"""Returns a signature tuple based on the input which is expected to be the
 		wavelet transform of an image
 		"""		
 		if not self.wavelets:
 			self.transform()
-			
+		if self.signature:
+			return self.signature
+
+		self.signature = {}
 		input = self.wavelets	
 		length=len(input)/8
 	
-		sig=[[], [], []]
 		tmp=[0]*length
-	
 		for band in xrange(3):
 			# copy the values in the current band into a tmp buffer
 			for i in xrange(length):
 				tmp[i] = (input[i][band], i)
 			
+			sig = []
+			
 			# sorting by x[0]^2 because we want both negative and positive significant
 			# coefficients
 			tmp.sort(key = lambda x: x[0]*x[0])
 			
-			# this method is not identical to signature() because signature() is first 
-			# come first serve, it takes the low location value coefficients first,
-			# while this doesn't. 
-			
 			# take config.taps number of significan coefficients if we have enough
 			if length > config.taps:
-				sig[band] = tmp[-config.taps:]
+				sig = tmp[:config.taps]
 			else:
 				# otherwise take the entire tmp
-				sig[band] = tmp[:]
+				sig = tmp[:]
 			
-			# normalise the signatures, research shows this is better
-			tmpsig = []*len(sig[band])
-			for s in sig[band]:
+			# normalise the signatures, research shows this is better	
+			for s in sig:
 				v = s[0]
 				l = s[1]
-				if v > 0:
-					v = 1
-				elif v < 0:
-					v = -1
-				s = (l,v)
-				tmpsig.append(s)
-			sig[band]=tmpsig[:]
-			# print sig[band]
-			
-		return set(sig[0]), set(sig[1]), set(sig[2])
+				
+				# clamp to [-1,1]
+				v = max(-1, min(1, v))
+				k = (band, l)
+				self.signature[k] = v
+
+		return self.signature
 	
 	def transform_array(self, input):
-		"""Performs wavelet transform on the input, destorys input"""
+		"""
+		Performs wavelet transform on the input, destorys input, 
+		see http://en.wikipedia.org/wiki/Discrete_wavelet_transform
+		"""
 		length = len(input)
 		output = [0]*length
 		
@@ -177,20 +126,15 @@ class WaveletImage(object):
 			length/=2
 			
 			for i in xrange(length):
-				# s = self.pix_sum(input[i*2], input[i*2+1])
-				# d = self.pix_diff(input[i*2], input[i*2+1])
-				# output[i] = s
-				# output[length+i] = d
-				
 				x = input[i*2]
 				y = input[i*2+1]
 				output[i] = (x[0]+y[0], x[1]+y[1], x[2]+y[2])
 				output[length+i] = (x[0]-y[0], x[1]-y[1], x[2]-y[2])
 
-			if length == 1:
+			if length <= 1:
 				return output
-			else:
-				input = output[:length*2]
+			
+			input = output[:length*2]
 
 		raise Exception
 		
@@ -202,47 +146,28 @@ class WaveletImage(object):
 		input = list(self.data)
 		
 		self.wavelets = self.transform_array(input)
-		#self.wavelets = pyx.pyx_transform_array(input)
 		return
 		
-		# rows, cols = self.im.size
-		# 
-		# # perform a transform on each row
-		# for row in xrange(rows):
-		# 	input[row*cols:(row+1)*cols] = self.transform_array(input[row*cols:(row+1)*cols])
-		# 	
-		# transposed=[]
-		# # now transpose the flatten array
-		# for col in xrange(cols):
-		# 	for row in xrange(rows):
-		# 			transposed.append(input[row*cols+col])
-		# 			
-		# input = transposed;
-		# cols, rows = self.im.size
-		# 
-		# # perform another transform on each row
-		# # perform a transform on each row
-		# for row in xrange(rows):
-		# 	input[row*cols:(row+1)*cols] = self.transform_array(input[row*cols:(row+1)*cols])
-		# 
-		# transposed=[]
-		# # now transpose the flatten array
-		# for col in xrange(cols):
-		# 	for row in xrange(rows):
-		# 			transposed.append(input[row*cols+col])
-		# 			
-		# self.wavelets = transposed
-				
 	def compare(self, other):
 		"""Compars this wavelet transform to another, returning a tuple of similarness"""
-		sig = other.signature()
-		
-		score = []
-		for b in xrange(3):
-			score.append(config.weights[b]*len(self.sig[b].intersection(sig[b])))
-		
-		return tuple(score)
+		sig1 = other.get_signature()
+		sig2 = self.get_signature()
+
+		return signature_compare(sig1, sig2)
+
 			
+def	signature_compare(sig1, sig2):
+	score = 0
+	for key,value in sig1.items():
+		if sig2.has_key(key):
+			if sig2[key] == value:
+				score += config.weights[key[0]]
+			else:
+				score += config.weights[key[0]] * 0.5
+
+		
+	return score
+
 def main():
 	pass
 
