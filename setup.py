@@ -29,7 +29,7 @@ else:
 #	INSTALL_REQUIRES = ['PIL', 'pyglet']
 	
 setup(
-   version=$Rev$,
+   version="$Rev$".split(' ')[1],
    description='Image browser with sort, cluster ability based on wavelet transforms',
    author='Shu Ning Bian',
    author_email='freespace@gmail.com',
