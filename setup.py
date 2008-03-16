@@ -10,9 +10,9 @@ Licensed for distribution under the GPL version 2, check COPYING for details
 
 from setuptools import setup,find_packages
 import sys
-import ez_setup
+#import ez_setup
 
-ez_setup.use_setuptools()
+#ez_setup.use_setuptools()
 
 APP = ['mactorii.py']
 DATA_FILES = [("baseline/",["baseline/b3.jpg", "baseline/b4.jpg", "baseline/b6.jpg","baseline/b7.jpg"])]
@@ -23,10 +23,10 @@ if sys.platform == "darwin":
 else:
 	SETUP_REQUIRES=[]
 
-if sys.argv[1] == "py2app":
-	INSTALL_REQUIRES = []
-else:
-	INSTALL_REQUIRES = ['PIL', 'pyglet']
+#if sys.argv[1] == "py2app":
+#	INSTALL_REQUIRES = []
+#else:
+#	INSTALL_REQUIRES = ['PIL', 'pyglet']
 	
 setup(
    version='0.52',
@@ -39,9 +39,9 @@ setup(
 	name="mactorii",
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
-    py_modules = ['mactorii', 'config','wavelet', 'Imaging', 'pyglet'],
+    py_modules = ['mactorii', 'config','wavelet'],# 'Imaging', 'pyglet'],
 	setup_requires = SETUP_REQUIRES,
-	install_requires = INSTALL_REQUIRES,
+#	install_requires = INSTALL_REQUIRES,
 	license = "Creative Commons Attribution-Noncommercial-Share Alike 2.5 Australia License",
     keywords = "image, browser, wavelet, sort",
 )
