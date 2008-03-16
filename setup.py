@@ -10,7 +10,6 @@ Licensed for distribution under the GPL version 2, check COPYING for details
 
 from setuptools import setup,find_packages
 import sys
-import svn_version
 #import ez_setup
 
 #ez_setup.use_setuptools()
@@ -30,7 +29,7 @@ else:
 #	INSTALL_REQUIRES = ['PIL', 'pyglet']
 	
 setup(
-   version=svn_version.ver,
+   version=$Rev$,
    description='Image browser with sort, cluster ability based on wavelet transforms',
    author='Shu Ning Bian',
    author_email='freespace@gmail.com',
