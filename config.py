@@ -38,6 +38,8 @@ baselines=(
 fps = 16
 xmotion_time = 0.03
 bands = 3
+title = 'mactorii'
+
 def main():
 	pass
 

@@ -286,7 +286,7 @@ class MactoriiApplication:
 		
 	def setup_window(self):
 		"""sets up our window"""
-		win = window.Window(resizable=True, visible=False)
+		win = window.Window(resizable=True, visible=False, caption=config.title)
 		
 		win.push_handlers(self.on_resize)
 		win.push_handlers(self.on_key_press)
@@ -294,7 +294,8 @@ class MactoriiApplication:
 		win.push_handlers(self.on_mouse_press)
 		win.push_handlers(self.on_mouse_release)
 		win.push_handlers(self.on_mouse_motion)
-		
+
+
 		return win
 		
 	def setup_font(self):
