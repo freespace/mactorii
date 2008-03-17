@@ -36,7 +36,6 @@ class MactoriiApplication:
 	# key is the filename, value is another dictionary, with keys
 	# surface, signature, size, cluster key
 	images = dict()
-	baselines = []
 	unloaded = None
 	renderables = None
 
@@ -195,14 +194,6 @@ class MactoriiApplication:
 	def cluster_func(self,item):
 		return self.images[item[0]]['cluster key']
 
-		item_sig = self.images[item[0]]['signature']
-		
-		score = 0
-		for sig in self.baselines:
-			score += wavelet.signature_compare(sig, item_sig)**5
-			
-		return score
-		
 	def images_to_renderables(self,images):
 		"""returns images.items() as a set of (filename, python surface, image size)"""
 		return [(filename, (data['surface'], data['size'])) for filename, data in images.items()]
@@ -250,12 +241,6 @@ class MactoriiApplication:
 		
 		return -wavelet.signature_compare(selected_sig, item_sig)
 
-	def load_baseline(self,file):
-		"""loads baseline pictures"""
-#	print "processing baseline: %s"%(file)
-		wi = wavelet.open(file)
-		sig = wi.get_signature()
-		self.baselines.append(sig)
 		
 	def load_file(self,file):
 		"""loads the files given in the command line"""
@@ -387,7 +372,6 @@ class MactoriiApplication:
 		
 		self.win.set_visible()
 		self.unloaded = list(self.files)
-		self.unloaded_baselines = list(config.baselines)
 		
 		self.update_renderables()
 		print "loading %d files"%(len(self.unloaded))
@@ -398,16 +382,6 @@ class MactoriiApplication:
 			self.win.dispatch_events()
 			glClear(GL_COLOR_BUFFER_BIT)
 			
-			if len(self.unloaded_baselines) > 0:
-				f = self.unloaded_baselines.pop()
-				str = "|||||"*len(self.unloaded_baselines)
-				t = font.Text(ft, str, 0, config.text_yoffset)
-				t.draw()
-				self.win.flip()
-				
-				#self.load_baseline(f)
-				continue
-				
 			if len(self.unloaded) > 0:
 				f = self.unloaded.pop()
 				t = font.Text(ft, self.to_unicode(f), config.text_yoffset, config.text_yoffset)
@@ -434,7 +408,7 @@ class MactoriiApplication:
 				continue
 				
 			if self.xmotion < 0:
-				if strip_width() + self.xoffset > self.win.width:
+				if self.strip_width() + self.xoffset > self.win.width:
 					self.xoffset+=self.xmotion * time_passed / config.xmotion_time 
 					
 			if self.xmotion > 0:

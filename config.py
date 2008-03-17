@@ -11,8 +11,8 @@ Licensed for distribution under the GPL version 2, check COPYING for details.
 import sys
 import os
 
-taps = 96
-weights = (100, 70, 50)
+taps = 128
+weights = (100, 50, 50)
 
 img_size = (128, 128)
 crop_size= 90
@@ -26,16 +26,7 @@ trash_dir = ".mactorii-trash"
 
 text_yoffset = 3
 
-baselines=(	
-#			"baseline/b1.jpg", 
-#			"baseline/b2.jpg", 
-			"baseline/b3.jpg",
-			"baseline/b4.jpg", 
-#			"baseline/b5.jpg", 
-			"baseline/b6.jpg",
-			"baseline/b7.jpg",
-			)
-fps = 16
+fps = 32
 xmotion_time = 0.03
 bands = 3
 title = 'mactorii'
