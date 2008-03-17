@@ -212,15 +212,18 @@ class MactoriiApplication:
 		self.renderables_key_func = self.cluster_func
 		key = 0
 		filename_sigs = [(filename, data['signature']) for filename, data in self.images.items()]
-		for file, data in self.images.items():
-			sig = data['signature']
-			filename_sigs.sort(key = lambda x: -wavelet.signature_compare(sig, x[1]))
-			# if the above worked properly, the first item in the list should be itself
-			assert filename_sigs[0][0] == file
-			data['cluster key']=key
-			self.images[filename_sigs[1][0]]['cluster key']=key
-			key+=1	
+		seed = filename_sigs[0][0]
+		del filename_sigs[0]
 
+		done = False
+		while len(filename_sigs):
+			key+=1
+			sig = self.images[seed]['signature']
+			filename_sigs.sort(key = lambda x: -wavelet.signature_compare(sig, x[1]))
+			f = filename_sigs[0][0]
+			self.images[f]['cluster key']=key
+			del filename_sigs[0]
+			seed = f
 		self.update_renderables()
 		
 	def update_renderables(self,sort=True):
@@ -402,7 +405,7 @@ class MactoriiApplication:
 				t.draw()
 				self.win.flip()
 				
-				self.load_baseline(f)
+				#self.load_baseline(f)
 				continue
 				
 			if len(self.unloaded) > 0:

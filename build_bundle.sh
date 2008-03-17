@@ -3,6 +3,9 @@ echo "removing old directories"
 rm -rf build/*
 rm -rf dist/*
 
+echo "running svn up"
+svn up
+
 echo "running py2app"
 python setup.py py2app
 cd dist

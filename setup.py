@@ -15,7 +15,7 @@ import sys
 #ez_setup.use_setuptools()
 
 APP = ['mactorii.py']
-DATA_FILES = [("baseline/",["baseline/b3.jpg", "baseline/b4.jpg", "baseline/b6.jpg","baseline/b7.jpg"])]
+DATA_FILES = [] #[("baseline/",["baseline/b3.jpg", "baseline/b4.jpg", "baseline/b6.jpg","baseline/b7.jpg"])]
 OPTIONS = {'argv_emulation': True, 'iconfile': 'mactorii.icns'}
 
 if sys.platform == "darwin":
