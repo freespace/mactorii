@@ -33,6 +33,8 @@ class MactoriiApplication:
 
 	files = None
 	win = None
+	# key is the filename, value is another dictionary, with keys
+	# surface, signature, size, cluster key
 	images = dict()
 	baselines = []
 	unloaded = None
@@ -191,7 +193,9 @@ class MactoriiApplication:
 		self.toggle_full_view()
 
 	def cluster_func(self,item):
-		item_sig = self.images[item[0]][1]
+		return self.images[item[0]]['cluster key']
+
+		item_sig = self.images[item[0]]['signature']
 		
 		score = 0
 		for sig in self.baselines:
@@ -200,18 +204,29 @@ class MactoriiApplication:
 		return score
 		
 	def images_to_renderables(self,images):
-		"""returns images.items() as a set, minus sig data, which is set to zero"""
-		return list( [(t[0],(t[1][0], t[1][2])) for t in images.items()])
+		"""returns images.items() as a set of (filename, python surface, image size)"""
+		return [(filename, (data['surface'], data['size'])) for filename, data in images.items()]
 
 	def cluster_renderables(self):
 		"""cluster renderables by their score against the 2 base lines"""
 		self.renderables_key_func = self.cluster_func
+		key = 0
+		filename_sigs = [(filename, data['signature']) for filename, data in self.images.items()]
+		for file, data in self.images.items():
+			sig = data['signature']
+			filename_sigs.sort(key = lambda x: -wavelet.signature_compare(sig, x[1]))
+			# if the above worked properly, the first item in the list should be itself
+			assert filename_sigs[0][0] == file
+			data['cluster key']=key
+			self.images[filename_sigs[1][0]]['cluster key']=key
+			key+=1	
+
 		self.update_renderables()
 		
 	def update_renderables(self,sort=True):
 		if self.renderables:
 			n = self.images_to_renderables(self.images)
-			if len(n) > len(self.renderables):
+			if len(n) != len(self.renderables):
 				# images were added, so just re-assign renderables
 				self.renderables = n
 			elif len(n) < len(self.renderables):
@@ -227,8 +242,8 @@ class MactoriiApplication:
 	def sort_func(self,item):
 		assert self.selected != None
 		
-		selected_sig = self.selected[1]
-		item_sig = self.images[item[0]][1]
+		selected_sig = self.selected['signature']
+		item_sig = self.images[item[0]]['signature']
 		
 		return -wavelet.signature_compare(selected_sig, item_sig)
 
@@ -279,8 +294,7 @@ class MactoriiApplication:
 		psurf=pyglet_image.ImageData(im.size[0],im.size[1],"RGB",im.tostring())
 		
 		# add to our dictionary
-		self.images[ file ] = (psurf, sig, wi.size)
-		
+		self.images[ file ] = {'surface':psurf, 'signature':sig, 'size':wi.size, 'cluster key':0}
 	def to_unicode(self,s):
 		return unicode(s, 'utf-8', 'ignore')
 		
