@@ -31,6 +31,8 @@ xmotion_time = 0.03
 bands = 3
 title = 'mactorii'
 
+version="$Rev$".split(' ')[1]
+
 def main():
 	pass
 
