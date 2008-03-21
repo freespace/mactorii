@@ -29,9 +29,10 @@ text_yoffset = 3
 fps = 32
 xmotion_time = 0.03
 bands = 3
-title = 'mactorii'
 
 version="$Rev$".split(' ')[1]
+title = 'mactorii v.0%s'%(version)
+
 
 def main():
 	pass
