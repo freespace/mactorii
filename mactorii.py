@@ -28,6 +28,8 @@ from pyglet.window import key
 from pyglet.window import mouse
 from pyglet import font
 
+version="$Rev$".split(' ')[1]
+
 class MactoriiApplication:
 	renderables_key_func = lambda x : 0
 
@@ -288,7 +290,7 @@ class MactoriiApplication:
 		
 	def setup_window(self):
 		"""sets up our window"""
-		win = window.Window(resizable=True, visible=False, caption=config.title)
+		win = window.Window(resizable=True, visible=False, caption='mactorii v0.%s'%(version))
 		
 		win.push_handlers(self.on_resize)
 		win.push_handlers(self.on_key_press)

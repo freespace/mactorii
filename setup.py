@@ -23,7 +23,7 @@ else:
 	SETUP_REQUIRES=[]
 
 setup(
-   version=config.version,
+   version=mactorii.version,
    description='Image browser with sort, cluster ability based on wavelet transforms',
    author='Shu Ning Bian',
    author_email='freespace@gmail.com',

@@ -30,9 +30,6 @@ fps = 32
 xmotion_time = 0.03
 bands = 3
 
-version="$Rev$".split(' ')[1]
-title = 'mactorii v0.%s'%(version)
-
 
 def main():
 	pass
