@@ -435,14 +435,8 @@ class MactoriiApplication:
 						pix_size = font.Text(ft,"%dx%d"%(image[1][0], image[1][1]), x, y+config.text_yoffset)
 						pix_name = font.Text(ft, self.to_unicode(os.path.basename(filename)), x, y+config.text_yoffset+int(pix_size.height))						
 
-						w = pix_size.width
-						if pix_name.width > pix_size.width:
-							w = pix_name.width
-						
-						if w < config.crop_size:
-							w = config.crop_size
-						else:
-							w = math.ceil(w/config.crop_size)*config.crop_size
+						w = max(pix_size.width, pix_name.width)
+						w = max(config.crop_size, (w/config.crop_size+1)*config.crop_size)
 							
 						w = int(w)
 						h = int(pix_name.height+pix_size.height+config.text_yoffset)
