@@ -31,7 +31,6 @@ setup(
     
     app=APP,
 	name="mactorii",
-    data_files=DATA_FILES,
     options={'py2app': OPTIONS},
     py_modules = ['mactorii', 'config','wavelet'],# 'Imaging', 'pyglet'],
 	setup_requires = SETUP_REQUIRES,
