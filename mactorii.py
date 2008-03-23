@@ -64,7 +64,7 @@ class MactoriiApplication:
 	display_picture = None
 
 	root = None
-
+	
 	def on_mouse_motion(self,x,y,dx,dy):
 		self.hoverx = x
 		self.hovery = y
@@ -280,8 +280,7 @@ class MactoriiApplication:
 		im=im.crop(box)
 		
 		# make a pyglet image out of it
-		im = im.transpose(Image.FLIP_TOP_BOTTOM)
-		psurf=pyglet_image.ImageData(im.size[0],im.size[1],"RGB",im.tostring())
+		psurf = image_to_psurf(im)
 		
 		# add to our dictionary
 		self.images[ file ] = {'surface':psurf, 'signature':sig, 'size':wi.size, 'cluster key':0}
@@ -298,8 +297,10 @@ class MactoriiApplication:
 		win.push_handlers(self.on_mouse_press)
 		win.push_handlers(self.on_mouse_release)
 		win.push_handlers(self.on_mouse_motion)
-
-
+		
+		glEnable(GL_BLEND) 
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) 
+		
 		return win
 		
 	def setup_font(self):
@@ -368,13 +369,18 @@ class MactoriiApplication:
 		assert self.win != None
 		assert ft != None
 		
+		# generate our oft used black background
 		image_pattern = pyglet_image.SolidColorImagePattern((0,0,0,1))
-		
+	
+		# load the resizer graphic
+		resizer = image_to_psurf(Image.open('resizer.jpg'))
+
+		# limit fps to reduce cpu usage
 		clock.set_fps_limit(config.fps)
-		
+	
+		# start loading files
 		self.win.set_visible()
 		self.unloaded = list(self.files)
-		
 		self.update_renderables()
 		print "loading %d files"%(len(self.unloaded))
 		start_time = time.time()
@@ -401,14 +407,16 @@ class MactoriiApplication:
 			else:
 				# raise Exception
 				pass
-				
+			
+			# if we need to display a full image, do so
 			if self.display_picture != None:
 				w = self.display_picture.width
 				h = self.display_picture.height
 				self.display_picture.blit((self.win.width-w)/2,(self.win.height-h)/2)
 				self.win.flip()
 				continue
-				
+			
+			# adjust the xoffset if required 		
 			if self.xmotion < 0:
 				if self.strip_width() + self.xoffset > self.win.width:
 					self.xoffset+=self.xmotion * time_passed / config.xmotion_time 
@@ -416,9 +424,11 @@ class MactoriiApplication:
 			if self.xmotion > 0:
 				if self.xoffset < 0:
 					self.xoffset+=self.xmotion * time_passed / config.xmotion_time 
-			if self.xoffset > 0:
-				self.xoffset = 0
-						
+
+			# clamp xoffset to 0 if xoffset is > 0
+			self.xoffset = min(self.xoffset, 0)
+			
+			# render the tiles
 			x = self.xoffset 
 			y = self.yoffset
 			pix_name = None
@@ -432,11 +442,14 @@ class MactoriiApplication:
 				if ( x >= -config.crop_size and x < self.win.width):
 					img.blit(x,y)				
 					
+					# if the cursor is over this tile, render some information
 					if self.is_over_image(x,y,self.hoverx, self.hovery) and (not pix_name or filename != pix_name.text):
 						# draw some information
 						pix_size = font.Text(ft,"%dx%d"%(image[1][0], image[1][1]), x, y+config.text_yoffset)
 						pix_name = font.Text(ft, self.to_unicode(os.path.basename(filename)), x, y+config.text_yoffset+int(pix_size.height))						
-
+						
+						# calculate the black background required to make text show up
+						# width needs to be in integer multiples of tile size
 						w = max(pix_size.width, pix_name.width)
 						w = max(config.crop_size, (w/config.crop_size+1)*config.crop_size)
 							
@@ -445,6 +458,8 @@ class MactoriiApplication:
 						text_bg = image_pattern.create_image(w,h)
 						blit_position=(x, y)
 					
+						# remember which image we are hovering over so when a click is seen
+						# we know which image to display 
 						self.hovering_over = filename
 
 				drawn+=1
@@ -454,15 +469,26 @@ class MactoriiApplication:
 					x+=config.crop_size
 					y = self.yoffset
 
+			# everything drawn here is drawn over everything else
 			if self.fps_display:
 				self.fps_display.draw()
+			
 			if self.hovering_over:
 				text_bg.blit(blit_position[0], blit_position[1])
 				pix_name.draw()
 				pix_size.draw()
-				
+		
+			w = self.win.width
+			h = 0
+			w = w - resizer.width
+			resizer.blit(w,h)
+
 			self.win.flip()
 	
+def	image_to_psurf(im):
+	im = im.transpose(Image.FLIP_TOP_BOTTOM)
+	return pyglet_image.ImageData(im.size[0],im.size[1],"RGB",im.tostring())
+
 if __name__ == '__main__':
 	app = MactoriiApplication()
 	app.main()

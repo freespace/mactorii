@@ -12,10 +12,11 @@ from setuptools import setup,find_packages
 import sys
 
 
-import config
+import mactorii
 
 APP = ['mactorii.py']
 OPTIONS = {'argv_emulation': True, 'iconfile': 'mactorii.icns'}
+DATA_FILES = ['resizer.jpg']
 
 if sys.platform == "darwin":
 	SETUP_REQUIRES=['py2app']
@@ -23,12 +24,12 @@ else:
 	SETUP_REQUIRES=[]
 
 setup(
-   version=mactorii.version,
-   description='Image browser with sort, cluster ability based on wavelet transforms',
-   author='Shu Ning Bian',
-   author_email='freespace@gmail.com',
-   url='http://trac.pictorii.com/mactorii/',
-    
+   	version=mactorii.version,
+   	description='Image browser with sort, cluster ability based on wavelet transforms',
+   	author='Shu Ning Bian',
+   	author_email='freespace@gmail.com',
+	url='http://trac.pictorii.com/mactorii/',
+   	data_files = DATA_FILES, 
     app=APP,
 	name="mactorii",
     options={'py2app': OPTIONS},
