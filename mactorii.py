@@ -479,9 +479,8 @@ class MactoriiApplication:
 				pix_size.draw()
 		
 			w = self.win.width
-			h = 0
 			w = w - resizer.width
-			resizer.blit(w,h)
+			resizer.blit(w,0)
 
 			self.win.flip()
 	
