@@ -1,9 +1,6 @@
 Usage
 =====
 
-For now it must be ran from command line:
-./mactorii.app/Contents/MacOS/mactorii /path/to/some/place/*.jpg
-
 It is still a bit slow, so start with a small image collection. mactorii 
 supports whaever PIL supports, so you don't have to use *.jpg
 
