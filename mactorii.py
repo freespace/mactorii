@@ -28,7 +28,7 @@ from pyglet.window import key
 from pyglet.window import mouse
 from pyglet import font
 
-version=0.77
+version=0.78
 
 class MactoriiApplication:
 	renderables_key_func = lambda x : 0
@@ -370,7 +370,7 @@ class MactoriiApplication:
 		assert ft != None
 		
 		# generate our oft used black background
-		image_pattern = pyglet_image.SolidColorImagePattern((0,0,0,255))
+		image_pattern = pyglet_image.SolidColorImagePattern((0,0,0,1))
 	
 		# load the resizer graphic
 		resizer = image_to_psurf(Image.open('resizer.jpg'))
