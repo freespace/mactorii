@@ -372,8 +372,6 @@ class MactoriiApplication:
 		# generate our oft used black background
 		image_pattern = pyglet_image.SolidColorImagePattern((0,0,0,255))
 	
-		# load the resizer graphic
-		resizer = image_to_psurf(Image.open('resizer.jpg'))
 
 		# limit fps to reduce cpu usage
 		clock.set_fps_limit(config.fps)
@@ -478,10 +476,6 @@ class MactoriiApplication:
 				pix_name.draw()
 				pix_size.draw()
 		
-			w = self.win.width
-			w = w - resizer.width
-			resizer.blit(w,0)
-
 			self.win.flip()
 	
 def	image_to_psurf(im):
