@@ -289,7 +289,7 @@ class MactoriiApplication:
 		
 	def setup_window(self):
 		"""sets up our window"""
-		win = window.Window(resizable=True, visible=False, caption='mactorii v0.%s'%(version))
+		win = window.Window(resizable=True, visible=False, caption='mactorii v%s'%(version))
 		
 		win.push_handlers(self.on_resize)
 		win.push_handlers(self.on_key_press)
@@ -370,7 +370,7 @@ class MactoriiApplication:
 		assert ft != None
 		
 		# generate our oft used black background
-		image_pattern = pyglet_image.SolidColorImagePattern((0,0,0,1))
+		image_pattern = pyglet_image.SolidColorImagePattern((0,0,0,255))
 	
 
 		# limit fps to reduce cpu usage
