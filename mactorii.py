@@ -370,7 +370,7 @@ class MactoriiApplication:
 		assert ft != None
 		
 		# generate our oft used black background
-		image_pattern = pyglet_image.SolidColorImagePattern((0,0,0,1))
+		image_pattern = pyglet_image.SolidColorImagePattern((0,0,0,255))
 	
 		# load the resizer graphic
 		resizer = image_to_psurf(Image.open('resizer.jpg'))
