@@ -28,7 +28,7 @@ from pyglet.window import key
 from pyglet.window import mouse
 from pyglet import font
 
-version=0.76
+version="$Rev$".split(' ')[1]
 
 class MactoriiApplication:
 	renderables_key_func = lambda x : 0
