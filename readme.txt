@@ -1,8 +1,19 @@
+Depedencies
+====
+
+1. PIL: sudo apt-get install python-imaging
+2. Tkinter: sudo apt-get install python-tk 
+
 Usage
 =====
 
-For now it must be ran from command line:
-./mactorii.app/Contents/MacOS/mactorii /path/to/some/place/*.jpg
+Launch it using:
+
+python mactorii.py
+
+or 
+
+python mactorii.py <file1> <file2>...
 
 It is still a bit slow, so start with a small image collection. mactorii 
 supports whaever PIL supports, so you don't have to use *.jpg
@@ -37,3 +48,10 @@ c					attempts to cluster similar images.
 v					displays the picture you are hovering over in full
 					window view. Pressing this key while in full-view
 					will drop you back into thumbnail view.
+
+Configuration
+====
+Adjust values in config.py. I know its not documented, so just drop me an
+email :-)
+
+freespace@gmail.com
