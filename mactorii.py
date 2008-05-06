@@ -375,8 +375,6 @@ class MactoriiApplication:
 		# load the resizer graphic
 		resizer = image_to_psurf(Image.open('resizer.jpg'))
 
-		# limit fps to reduce cpu usage
-		clock.set_fps_limit(config.fps)
 	
 		# start loading files
 		self.win.set_visible()
@@ -404,6 +402,8 @@ class MactoriiApplication:
 				if len(self.unloaded) == 0:
 					print "loading took %f seconds"%(time.time()-start_time)
 					
+					# limit fps to reduce cpu usage
+					clock.set_fps_limit(config.fps)
 			else:
 				# raise Exception
 				pass
