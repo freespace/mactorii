@@ -8,10 +8,7 @@ Copyright (c) 2007 . All rights reserved.
 Licensed for distribution under the GPL version 2, check COPYING for details.
 """
 
-import sys
-import os
-
-taps = 128
+taps = 512
 weights = (100, 50, 50)
 
 img_size = (128, 128)
@@ -29,12 +26,3 @@ text_yoffset = 3
 fps = 32
 xmotion_time = 0.03
 bands = 3
-
-
-def main():
-	pass
-
-
-if __name__ == '__main__':
-	main()
-
