@@ -201,7 +201,7 @@ class MactoriiApplication:
 		return [(filename, (data['surface'], data['size'])) for filename, data in images.items()]
 
 	def cluster_renderables(self):
-		"""cluster renderables by their score against the 2 base lines"""
+		"""cluster renderables"""
 		self.renderables_key_func = self.cluster_func
 		key = 0
 		filename_sigs = [(filename, data['signature']) for filename, data in self.images.items()]
@@ -218,7 +218,7 @@ class MactoriiApplication:
 			del filename_sigs[0]
 			seed = f
 		self.update_renderables()
-		
+
 	def update_renderables(self,sort=True):
 		if self.renderables:
 			n = self.images_to_renderables(self.images)
@@ -228,35 +228,35 @@ class MactoriiApplication:
 			elif len(n) < len(self.renderables):
 				# images were removed, we need to remove them from renderables too
 				self.renderables = n
-				
+
 		else:
 			self.renderables = self.images_to_renderables(self.images)
-			
+
 		if sort:
 			self.renderables.sort(key=self.renderables_key_func)
 
 	def sort_func(self,item):
 		assert self.selected != None
-		
+
 		selected_sig = self.selected['signature']
 		item_sig = self.images[item[0]]['signature']
-		
+
 		return -wavelet.signature_compare(selected_sig, item_sig)
 
-		
+
 	def load_file(self,file):
 		"""loads the files given in the command line"""
-		
+
 		#print "processing file: %s"%(file)
-		
+
 		try:
 			wi = wavelet.open(file)
 		except:
 			print "can't load file: %s"%(file)
 			return
-			
+
 		sig = wi.get_signature()
-		
+
 		# get the pre-loaded image from wavelet
 		im = wi.im
 		w,h = im.size
@@ -267,42 +267,42 @@ class MactoriiApplication:
 			s = 1.0*config.crop_size/h
 		else:
 			s = 1.0*config.crop_size/w
-		
+
 		w = int(w*s*1.3)
 		h = int(h*s*1.3)
 
-		im=im.resize((w, h), Image.ANTIALIAS)
-		
+		im=im.resize((w, h), Image.BILINEAR)
+
 		# crop out the centre crop_size square to use a thumbnail
 		midx = w/2
 		midy = h/2
 		box = (midx-config.crop_size/2, midy-config.crop_size/2, midx+config.crop_size/2, midy+config.crop_size/2)
 		im=im.crop(box)
-		
+
 		# make a pyglet image out of it
 		psurf = image_to_psurf(im)
-		
+
 		# add to our dictionary
 		self.images[ file ] = {'surface':psurf, 'signature':sig, 'size':wi.size, 'cluster key':0}
 	def to_unicode(self,s):
 		return unicode(s, 'utf-8', 'ignore')
-		
+
 	def setup_window(self):
 		"""sets up our window"""
 		win = window.Window(resizable=True, visible=False, caption='mactorii v%s'%(version))
-		
+
 		win.push_handlers(self.on_resize)
 		win.push_handlers(self.on_key_press)
 		win.push_handlers(self.on_key_release)
 		win.push_handlers(self.on_mouse_press)
 		win.push_handlers(self.on_mouse_release)
 		win.push_handlers(self.on_mouse_motion)
-		
-		glEnable(GL_BLEND) 
+
+		glEnable(GL_BLEND)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) 
-		
+
 		return win
-		
+
 	def setup_font(self):
 		"""sets up fonts"""
 		return font.load(config.font_name, config.font_size, bold=True)
@@ -310,102 +310,104 @@ class MactoriiApplication:
 	def is_over_image(self,x, y, mousex, mousey):
 		if mousex < 0 or mousey < 0:
 			return False
-			
+
 		if mousex < x or mousex > x + config.crop_size:
 			return False
-			
+
 		if mousey < y or mousey > y + config.crop_size:
 				return False
-					
+
 		return True
-		
+
 	def setup_trash(self):
 		try:
 			os.mkdir(config.trash_dir)
 		except:
 			return
-		
+
 	def find_common_signature(self,signatures):
 		common_sig = [set()]*config.bands
-		
+
 		for i in xrange(len(signatures)):
 			for b in xrange(config.bands):
 				if i == 0:
 					common_sig[b] = signatures[i][b]
 				else:
 					common_sig[b] = common_sig[b].intersection(signatures[i-1][b])
-								
+
 		return common_sig
-		
+
 	def main(self):
 		# order is important here. setup_window must be setup first! Likewise with font
 		self.win = self.setup_window()
 		ft = self.setup_font()
-		
+
 		self.root = Tkinter.Tk()
 		self.root.withdraw()
-		
+
 		if (sys.platform != "win32") and hasattr(sys, 'frozen'):
 			self.root.tk.call('console', 'hide')
-					
+
 		if len(sys.argv) < 2:
 			dirname = tkFileDialog.askdirectory(parent=self.root,initialdir="~",title='Please select a directory')
-						
+
 			if len(dirname ) > 0:
 				import dircache
 				ls = dircache.listdir(dirname)
 				ls = list(ls)
 				dircache.annotate(dirname, ls)
-				
+
 				self.files = ["%s%s%s"%(dirname,os.path.sep,e) for e in ls if not e.endswith('/')]
 			else:
 				sys.exit(1)
-		else:		
+		else:
 			self.files = sys.argv[1:]
-				
+
 		self.win.set_visible()
-		self.setup_trash()	
-		
+		self.setup_trash()
+
 		assert self.win != None
 		assert ft != None
-		
+
 		# generate our oft used black background
 		image_pattern = pyglet_image.SolidColorImagePattern((0,0,0,255))
-	
 
-		# limit fps to reduce cpu usage
-		clock.set_fps_limit(config.fps)
-	
+
 		# start loading files
 		self.win.set_visible()
 		self.unloaded = list(self.files)
 		self.update_renderables()
 		print "loading %d files"%(len(self.unloaded))
 		start_time = time.time()
+		clock.set_fps_limit(None)
 		while not self.win.has_exit:
 			time_passed = clock.tick()
-			
+
 			self.win.dispatch_events()
 			glClear(GL_COLOR_BUFFER_BIT)
-			
+
 			if len(self.unloaded) > 0:
 				f = self.unloaded.pop()
 				t = font.Text(ft, self.to_unicode(f), config.text_yoffset, config.text_yoffset)
-				t.draw()			
+				t.draw()
 				#win.flip()
-				
+
 				self.load_file(f)
-				
-				if len(self.unloaded) %3 == 0:
-					self.update_renderables(sort=False)
 
 				if len(self.unloaded) == 0:
 					print "loading took %f seconds"%(time.time()-start_time)
-					
+					# limit fps to reduce cpu usage
+					clock.set_fps_limit(config.fps)
+
+				if len(self.unloaded)%3 == 0:
+					self.update_renderables(sort=False)
+				else:
+					continue
+
 			else:
 				# raise Exception
 				pass
-			
+
 			# if we need to display a full image, do so
 			if self.display_picture != None:
 				w = self.display_picture.width
@@ -413,19 +415,19 @@ class MactoriiApplication:
 				self.display_picture.blit((self.win.width-w)/2,(self.win.height-h)/2)
 				self.win.flip()
 				continue
-			
+
 			# adjust the xoffset if required 		
 			if self.xmotion < 0:
 				if self.strip_width() + self.xoffset > self.win.width:
 					self.xoffset+=self.xmotion * time_passed / config.xmotion_time 
-					
+
 			if self.xmotion > 0:
 				if self.xoffset < 0:
 					self.xoffset+=self.xmotion * time_passed / config.xmotion_time 
 
 			# clamp xoffset to 0 if xoffset is > 0
 			self.xoffset = min(self.xoffset, 0)
-			
+
 			# render the tiles
 			x = self.xoffset 
 			y = self.yoffset
@@ -436,33 +438,33 @@ class MactoriiApplication:
 			blit_position = ()
 			for filename, image in self.renderables:
 				img = image[0]
-				
+
 				if ( x >= -config.crop_size and x < self.win.width):
-					img.blit(x,y)				
-					
+					img.blit(x,y)
+
 					# if the cursor is over this tile, render some information
 					if self.is_over_image(x,y,self.hoverx, self.hovery) and (not pix_name or filename != pix_name.text):
 						# draw some information
 						pix_size = font.Text(ft,"%dx%d"%(image[1][0], image[1][1]), x, y+config.text_yoffset)
 						pix_name = font.Text(ft, self.to_unicode(os.path.basename(filename)), x, y+config.text_yoffset+int(pix_size.height))						
-						
+
 						# calculate the black background required to make text show up
 						# width needs to be in integer multiples of tile size
 						w = max(pix_size.width, pix_name.width)
 						w = max(config.crop_size, (w/config.crop_size+1)*config.crop_size)
-							
+
 						w = int(w)
 						h = int(pix_name.height+pix_size.height+config.text_yoffset)
 						text_bg = image_pattern.create_image(w,h)
 						blit_position=(x, y)
-					
+
 						# remember which image we are hovering over so when a click is seen
 						# we know which image to display 
 						self.hovering_over = filename
 
 				drawn+=1
 				y-=config.crop_size
-				
+
 				if drawn % self.rows == 0:
 					x+=config.crop_size
 					y = self.yoffset
@@ -470,14 +472,14 @@ class MactoriiApplication:
 			# everything drawn here is drawn over everything else
 			if self.fps_display:
 				self.fps_display.draw()
-			
+
 			if self.hovering_over:
 				text_bg.blit(blit_position[0], blit_position[1])
 				pix_name.draw()
 				pix_size.draw()
-		
+
 			self.win.flip()
-	
+
 def	image_to_psurf(im):
 	im = im.transpose(Image.FLIP_TOP_BOTTOM)
 	return pyglet_image.ImageData(im.size[0],im.size[1],"RGB",im.tostring())
