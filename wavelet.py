@@ -45,8 +45,9 @@ class WaveletImage(object):
 			
 		im = Image.open(path)
 		self.size = im.size
-		im.thumbnail(config.img_size,Image.ANTIALIAS)
-		im = im.convert("RGB")
+		im.thumbnail(config.img_size,Image.BILINEAR)
+		if im.mode != "RGB":
+			im = im.convert("RGB")
 		
 		self.data = im.convert("RGB", rgb2yiq).getdata()
 		#self.data = im.convert("RGB", rgb2yuv).getdata()
@@ -65,77 +66,63 @@ class WaveletImage(object):
 	def pix_sum(self, x,y):
 		"""Returns a tuple which is the sum of the tuples given"""
 		return (x[0]+y[0], x[1]+y[1], x[2]+y[2])
-	
+
 	def pix_diff(self, x,y):
 		"""Returns a tuple which is the difference of the tuples given"""
 		return (x[0]-y[0], x[1]-y[1], x[2]-y[2])
-	
+
 	def get_signature(self):
 		"""Returns a signature tuple based on the input which is expected to be the
 		wavelet transform of an image
-		"""		
+		"""	
 		if not self.wavelets:
 			self.transform()
 		if self.signature:
 			return self.signature
 
 		self.signature = {}
-		input = self.wavelets	
-		length=len(input)/8
-	
-		tmp=[0]*length
+		length=len(self.wavelets)/8
+
+		sig=[0]*length
 		for band in xrange(3):
-			# copy the values in the current band into a tmp buffer
+			# copy the values in the current band into a sig buffer
 			for i in xrange(length):
-				tmp[i] = (input[i][band], i)
-			
-			sig = []
-			
+				sig[i] = (self.wavelets[i][band], i)
+
 			# sorting by x[0]^2 because we want both negative and positive significant
 			# coefficients
-			tmp.sort(key = lambda x: x[0]*x[0])
-			
-			# take config.taps number of significan coefficients if we have enough
-			if length > config.taps:
-				sig = tmp[:config.taps]
-			else:
-				# otherwise take the entire tmp
-				sig = tmp[:]
-			
+			sig.sort(key = lambda x: x[0]*x[0])
+
 			# normalise the signatures, research shows this is better	
-			for s in sig:
-				v = s[0]
-				l = s[1]
-				
+			for idx in xrange(min(config.taps, length)):
+				v,l = sig[idx]
+
 				# clamp to [-1,1]
 				v = max(-1, min(1, v))
 				k = (band, l)
 				self.signature[k] = v
 
 		return self.signature
-	
-	def transform_array(self, input):
+
+	def transform_array(self, array):
 		"""
 		Performs wavelet transform on the input, destorys input, 
 		see http://en.wikipedia.org/wiki/Discrete_wavelet_transform
 		"""
-		length = len(input)
-		output = [0]*length
+		length = len(array)
 		
 		while(True):
 			length/=2
 			
 			for i in xrange(length):
-				x = input[i*2]
-				y = input[i*2+1]
-				output[i] = (x[0]+y[0], x[1]+y[1], x[2]+y[2])
-				output[length+i] = (x[0]-y[0], x[1]-y[1], x[2]-y[2])
+				x = array[i*2]
+				y = array[i*2+1]
+				array[i] = (x[0]+y[0], x[1]+y[1], x[2]+y[2])
+				array[length+i] = (x[0]-y[0], x[1]-y[1], x[2]-y[2])
 
 			if length <= 1:
-				return output
+				return array
 			
-			input = output[:length*2]
-
 		raise Exception
 		
 	def transform(self):
@@ -143,9 +130,8 @@ class WaveletImage(object):
 		Performs a wavelet transform on the given image
 		"""
 		assert self.data != None, "Did you call .cleanup() before .signature()?"
-		input = list(self.data)
 		
-		self.wavelets = self.transform_array(input)
+		self.wavelets = self.transform_array(list(self.data))
 		return
 		
 	def compare(self, other):
@@ -163,7 +149,7 @@ def	signature_compare(sig1, sig2):
 			if sig2[key] == value:
 				score += config.weights[key[0]]
 			else:
-				score += config.weights[key[0]] * 0.5
+				score += config.weights[key[0]] * 0.1
 
 		
 	return score
